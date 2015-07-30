@@ -57,7 +57,7 @@ ___
 
 ### Result Query
 
-| ------------------------------ | ----------------------------------------------------------------:|
+| ------------------------------ |:----------------------------------------------------------------:|
 | `html&{parameter}`             | Generate database list show in HTML with play link.              |
 | `xml&{parameter}`              | Generate database list via standard XML format.                  |
 | `rss&{parameter}`              | Generate database list via RSS (Rich Site Summary) format.       |
