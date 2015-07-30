@@ -57,22 +57,76 @@ ___
 
 ### Result Query
 
-| ------------------------------ |:----------------------------------------------------------------:|
-| `html&{parameter}`             | Generate database list show in HTML with play link.              |
-| `xml&{parameter}`              | Generate database list via standard XML format.                  |
-| `rss&{parameter}`              | Generate database list via RSS (Rich Site Summary) format.       |
-| `m3u&{parameter}`              | Generate database list via Winamp playlist format.               |
-| `pls&{parameter}`              | Generate database list via SHOUTcast playlist format.            |
-| `asx | wax | wvx &{parameter}` | Generate database list via Microsoft playlist format.            |
-| `kpl&{parameter}`              | Generate database list via Kazaa or KM-Player playlist format.   |
-| `dpl&{parameter}`              | Generate database list via Daum PotPlayer format.                |
-| `qpl&{parameter}`              | Generate database list via QPPlaylist format.                    |
-| `wpl&{parameter}`              | Generate database list via Windows Media Player playlist format. |
-| `fs&{parameter}`               | Generate database list via FreeSmith Player playlist format.     |
-| `aimp2 | aimp3 &{parameter}`   | Generate database list via AIMP2 or AIMP3 playlist format.       |
-| `smil&{parameter}`             | Generate database list via W3C format.                           |
-| `xspf&{parameter}`             | Generate database list via Xiph.Org Foundation playlist format.  |
-| `xbmc&{parameter}`             | Generate database list via standard Kodi/XBMC playlist addons.   |
+<table>
+<thead>
+<tr>
+<th>Query</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>`html&{parameter}`</td>
+<td>Generate database list show in HTML with play link.</td>
+</tr>
+<tr>
+<td>`xml&{parameter}`</td>
+<td>Generate database list via standard XML format.</td>
+</tr>
+<tr>
+<td>`rss&{parameter}`</td>
+<td>Generate database list via RSS (Rich Site Summary) format.</td>
+</tr>
+<tr>
+<td>`m3u&{parameter}`</td>
+<td>Generate database list via Winamp playlist format.</td>
+</tr>
+<tr>
+<td>`pls&{parameter}`</td>
+<td>Generate database list via SHOUTcast playlist format.</td>
+</tr>
+<tr>
+<td>`asx | wax | wvx &{parameter}`</td>
+<td>Generate database list via Microsoft playlist format.</td>
+</tr>
+<tr>
+<td>`kpl&{parameter}`</td>
+<td>Generate database list via Kazaa or KM-Player playlist format.</td>
+</tr>
+<tr>
+<td>`dpl&{parameter}`</td>
+<td>Generate database list via Daum PotPlayer format.</td>
+</tr>
+<tr>
+<td>`qpl&{parameter}`</td>
+<td>Generate database list via QPPlaylist format.</td>
+</tr>
+<tr>
+<td>`wpl&{parameter}`</td>
+<td>Generate database list via Windows Media Player playlist format.</td>
+</tr>
+<tr>
+<td>`fs&{parameter}`</td>
+<td>Generate database list via FreeSmith Player playlist format.</td>
+</tr>
+<tr>
+<td>`aimp2 | aimp3 &{parameter}`</td>
+<td>Generate database list via AIMP2 or AIMP3 playlist format.</td>
+</tr>
+<tr>
+<td>`smil&{parameter}`</td>
+<td>Generate database list via W3C format.</td>
+</tr>
+<tr>
+<td>`xspf&{parameter}`</td>
+<td>Generate database list via Xiph.Org Foundation playlist format.</td>
+</tr>
+<tr>
+<td>`xbmc&{parameter}`</td>
+<td>Generate database list via standard Kodi/XBMC playlist addons.</td>
+</tr>
+</tbody>
+</table>
 
 ___
 #### Details of parameter:
