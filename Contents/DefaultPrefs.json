@@ -1,0 +1,22 @@
+[
+  {
+    "id": "server",
+    "label": "Server location",
+    "type": "enum",
+    "values": ["Indonesia", "Singapore", "German", "United Kingdom", "United State of America"],
+    "default": "Indonesia"
+  },
+  {
+    "id": "rtmp",
+    "label": "Use RTMP SimpleTV",
+    "type": "bool",
+    "default": "false"
+  },
+  {
+  	"id": "quality",
+	"type": "enum",
+    "label": "Preferred TV quality",
+	"values": ["Low","Middle","High"],
+    "default": "low" 
+  }
+]
