@@ -1,5 +1,11 @@
 # LihatTV.bundle
-Fork of the official [LihaTV](http://lihattv.com/) [Plex Media Server](https://plex.tv) bundle for development.
+Fork of the official [LihaTV](http://lihattv.com/) Plex bundle.
+Developing this Channel for better implementation in [Plex Media Server](https://plex.tv).
+
+#### Plans
+Create three main categories "Movies" "TV" and "Radio" and include a search function.
+Each category will have is own sub-genres and be limited to a number of items per page.
+Also plan to have a bookmarking function to create a personal list of favorite links.
 ***
 
 ## API Documentation
