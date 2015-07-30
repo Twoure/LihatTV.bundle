@@ -23,7 +23,8 @@ pick one domain you like:
 * lihattv.co.id
 * lihattv.co.uk
 * 7dplxsxxh54rxp4n.onion
-___
+
+---
 
 ### Basic Query
 ```bash
@@ -53,7 +54,7 @@ $ltv_status="26|username|email|***|11|1";
 logout # Access log out function.
 # no result
 ```
-___
+---
 
 ### Result Query
 
