@@ -1,5 +1,5 @@
 # LihatTV.bundle
-Fork of the official [LihaTV](http://lihattv.com/) Plex bundle.
+Fork of the official [LihatTV](http://lihattv.com/) Plex bundle.
 Developing this Channel for better implementation in [Plex Media Server](https://plex.tv).
 
 #### Plans
