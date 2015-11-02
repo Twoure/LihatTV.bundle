@@ -1,23 +1,128 @@
-# Copyright © July, 05 2014 lihattv
-
-TITLE = 'lihattv | Live TV Streaming'
+####################################################################################################
+#                                                                                                  #
+#                               LihatTV Plex Channel -- v0.01                                      #
+#                                                                                                  #
+####################################################################################################
+# set global variables
+TITLE = 'LihatTV'
 PREFIX = '/video/lihattv'
-ICON = R('icon-default.png')
-ART = R('icon.art.png')
-FOLDER = R('icon.genre.png')
-TOOLS = R('icon.tools.png')
-DOMAIN = 'http://lihattv.com/'
+BASE_URL = 'http://lihattv.com/'
 
+# set background art and icon defaults
+ICON = 'icon-default.png'
+ART = 'art-default.jpg'  #need better art
+VIDEO_THUMB = 'icon.genre.png'
+PREFS_ICON = 'icon.tools.png'
+
+####################################################################################################
 def Start():
     HTTP.CacheTime = 0
-    ObjectContainer.title1 = TITLE
-    DirectoryObject.thumb = FOLDER
-    ObjectContainer.art = ART
-    DirectoryObject.art = ART
-    VideoClipObject.art = ART
+    HTTP.Headers['User-Agent'] = 'PLEX 1.0'
 
-@handler(PREFIX, TITLE)
+    ObjectContainer.title1 = TITLE
+    ObjectContainer.art = R(ART)
+
+    DirectoryObject.thumb = R(VIDEO_THUMB)
+    DirectoryObject.art = R(ART)
+
+    VideoClipObject.art = R(ART)
+
+####################################################################################################
+@handler(PREFIX, TITLE, ICON, ART)
 def MainMenu():
+    oc = ObjectContainer(title2=TITLE)
+
+    oc.add(DirectoryObject(key=Callback(DirectoryList, category='Movie', page=1), title='Movie'))
+    oc.add(DirectoryObject(key=Callback(DirectoryList, category='Radio', page=1), title='Radio'))
+    oc.add(DirectoryObject(key=Callback(DirectoryList, category='TV', page=1), title='TV'))
+    oc.add(PrefsObject(title='Preferences', thumb=R(PREFS_ICON)))
+
+    return oc
+
+####################################################################################################
+@route(PREFIX + '/directorylist', page=int)
+def DirectoryList(category, page):
+    #stream = 'mms'  # or 'rtmp' or 'm3u8'
+    stream = Prefs['format']
+    limit = 10
+
+    q = 'api/?q=xml&channel=%s&stream=%s&limit=%i&page=%i' %(category, stream, limit, page)
+    url = BASE_URL + q
+
+    page_info = HTTP.Request(url).content.splitlines()
+    r_info = page_info[0] + page_info[-1]
+    Log('r_info = %s' %r_info)
+    page_el = XML.ElementFromString(r_info)
+    total = int(page_el.get('total'))
+    total_pgs = int(total/limit)
+
+    main_title = '%s | Page %i of %i' %(category, page, total_pgs)
+
+    oc = ObjectContainer(title2=main_title)
+
+    # setup url to parse xspf page
+    q2 = 'api/?q=xspf&channel=%s&stream=%s&limit=%i&page=%i' %(category, stream, limit, page)
+    url2 = BASE_URL + q2
+
+    """
+    test = HTTP.Request(url2).content
+    #Log(test)
+    xml = XML.ElementFromString(test, encoding='utf8')
+    Log(xml.xpath('//playlist/title/text()')[0])
+    """
+
+    #xml = XML.ElementFromURL(url2, encoding='utf8')
+    xml = HTML.ElementFromURL(url2, encoding='utf8')
+    """
+    Log(xml)
+    for child in xml:
+        Log('%s = %s' %(child.tag, child.text))
+
+    Log(xml.xpath('.')[0].tag[0].tag)
+    """
+
+    for node in xml.xpath('//track'):
+        Log('--------------------------------')
+        title_string = node.xpath('./title/text()')[0]
+        Log(title_string)
+        r = Regex('\[(.+?)\](.+?)\((.+?)(?:\ .)(.+?)\)').search(title_string)
+        ch_category = r.group(1).strip()
+        Log(ch_category)
+        ch_title = r.group(2).strip()
+        Log(ch_title)
+        ch_genre = r.group(3).strip()
+        Log(ch_genre)
+        ch_country = r.group(4).strip()
+        Log(ch_country)
+        tagline = 'Category: %s | Genre: %s | Country: %s' %(ch_category, ch_genre, ch_country)
+        ch_url = node.xpath('./location/text()')[0].strip()
+        Log(ch_url)
+
+        oc.add(
+            VideoClipObject(
+                title=ch_title,
+                summary=tagline,
+                tagline=tagline,
+                genres=[ch_genre],
+                countries=[ch_country],
+                thumb=R(VIDEO_THUMB),
+                art=R(ART),
+                url=ch_url
+                )
+            )
+
+    if page < total_pgs and len(oc) > 0:
+        oc.add(NextPageObject(
+            key=Callback(
+                DirectoryList, category=category, page=int(page)),
+            title='Next Page>>'))
+
+    if len(oc) > 0:
+        return oc
+    else:
+        return MessageContainer('Warning', 'No Streams in %s' %category)
+"""
+####################################################################################################
     empty_group = False
     groups_list = []
     items_dict = {}
@@ -54,6 +159,7 @@ def MainMenu():
     oc.add(PrefsObject(title = 'Configuration', thumb = TOOLS))
     return oc
 
+####################################################################################################
 #@route(PREFIX + '/listitems', items_dict = dict)
 def ListItems(items_dict, group):
     oc = ObjectContainer(title1 = L(group))
@@ -70,6 +176,7 @@ def ListItems(items_dict, group):
         ))
     return oc
 
+####################################################################################################
 #@route(PREFIX + '/createvideoclipobject')
 def CreateVideoClipObject(url, title, thumb, container = False):
     vco = VideoClipObject(
@@ -100,6 +207,7 @@ def CreateVideoClipObject(url, title, thumb, container = False):
         return vco
     return vco
 
+####################################################################################################
 def GetVideoURL(url, live = True):
     if url.startswith('rtmp') and Prefs['rtmp']:
         if url.find(' ') > -1:
@@ -117,6 +225,7 @@ def GetVideoURL(url, live = True):
     else:
         return HTTPLiveStreamURL(url = url)
 
+####################################################################################################
 def GetThumb(thumb):
     if thumb and thumb.startswith('http'):
         return thumb
@@ -125,6 +234,7 @@ def GetThumb(thumb):
     else:
         return R('icon.play.png')
 
+####################################################################################################
 def GetAttribute(text, a, y1 = '="', y2 = '"'):
     x = text.find(a)
     if x > -1:
@@ -135,3 +245,4 @@ def GetAttribute(text, a, y1 = '="', y2 = '"'):
         return unicode(text[y:z].strip())
     else:
         return ''
+"""

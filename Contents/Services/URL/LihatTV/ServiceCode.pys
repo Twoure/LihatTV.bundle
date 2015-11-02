@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+"""lihattv Service Code"""
+
+import base64
+
+####################################################################################################
+def NormalizeURL(url):
+    """This function should return a 'normalised' version of the given URL. Plex uses the URL"""
+
+    return url
+
+####################################################################################################
+def MetadataObjectForURL(url):
+    """
+    This function should create and return a metadata object (for example, a VideoClipOb-
+    ject) and populate it with metadata from the given URL. Only the metadata should be
+    added here - the object's key and rating_key properties will be synthesised based on the URL.
+    """
+
+    html = HTML.ElementFromURL(url, encoding='utf8')
+    title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
+
+    return VideoClipObject(title=title)
+
+####################################################################################################
+def MediaObjectsForURL(url):
+    """
+    This function should create and return a list of media objects and part objects representing
+    the media available at the given URL. Callbacks may be used if obtaining the final media
+    location requires additional computation.
+    """
+
+    html = HTML.ElementFromURL(url)
+    node = html.xpath('./script')[0].text_content().strip()
+    Log.Debug('node = %s' %node)
+    url64 = Regex('ie11=\'(.+?)\'').search(node).group(1)
+    Log.Debug('url64 = %s' %url64)
+    video_url = base64.b64decode(url64)
+    Log.Debug('v_url = %s' %video_url)
+
+    mo = [MediaObject(
+        parts=[PartObject(key=Callback(PlayVideo, url=video_url))],
+        container=Container.MP4,
+        video_codec=VideoCodec.H264,
+        audio_codec=AudioCodec.AAC,
+        audio_channels=2,
+        optimized_for_streaming=True)]
+
+    return mo
+
+####################################################################################################
+@indirect
+def PlayVideo(url, **kwargs):
+    """Format the video url depending on mms, rtmp, or m3u8"""
+
+    if url.startswith('rtmp'):
+        return IndirectResponse(VideoClipObject, key=RTMPVideoURL(url, live=True))
+    elif url.startswith('mms'):
+        return IndirectResponse(VideoClipObject, key=WindowsMediaVideoURL(url))
+    elif url.endswith('m3u8'):
+        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(url))
+    else:
+        raise Ex.MediaNotAvailable
