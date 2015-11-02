@@ -14,9 +14,9 @@
   },
   {
   	"id": "quality",
-	"type": "enum",
+    "type": "enum",
     "label": "Preferred TV quality",
-	"values": ["Low","Middle","High"],
-    "default": "low" 
+    "values": ["Low","Middle","High"],
+    "default": "low"
   }
 ]
