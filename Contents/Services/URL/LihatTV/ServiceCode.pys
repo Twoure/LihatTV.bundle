@@ -19,9 +19,9 @@ def MetadataObjectForURL(url):
     """
 
     html = HTML.ElementFromURL(url, encoding='utf8')
-    title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
+    title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()  #.decode('ISO-8859-1', errors='ignore')
 
-    return VideoClipObject(title=title)
+    return VideoClipObject(title=title, thumb='http://i.imgur.com/3EhTuzX.png', art='http://i.imgur.com/DKbNVLO.jpg')
 
 ####################################################################################################
 def MediaObjectsForURL(url):
@@ -31,16 +31,8 @@ def MediaObjectsForURL(url):
     location requires additional computation.
     """
 
-    html = HTML.ElementFromURL(url)
-    node = html.xpath('./script')[0].text_content().strip()
-    Log.Debug('node = %s' %node)
-    url64 = Regex('ie11=\'(.+?)\'').search(node).group(1)
-    Log.Debug('url64 = %s' %url64)
-    video_url = base64.b64decode(url64)
-    Log.Debug('v_url = %s' %video_url)
-
     mo = [MediaObject(
-        parts=[PartObject(key=Callback(PlayVideo, url=video_url))],
+        parts=[PartObject(key=Callback(PlayVideo, url=url))],
         container=Container.MP4,
         video_codec=VideoCodec.H264,
         audio_codec=AudioCodec.AAC,
@@ -54,11 +46,19 @@ def MediaObjectsForURL(url):
 def PlayVideo(url, **kwargs):
     """Format the video url depending on mms, rtmp, or m3u8"""
 
-    if url.startswith('rtmp'):
-        return IndirectResponse(VideoClipObject, key=RTMPVideoURL(url, live=True))
-    elif url.startswith('mms'):
-        return IndirectResponse(VideoClipObject, key=WindowsMediaVideoURL(url))
-    elif url.endswith('m3u8'):
-        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(url))
+    html = HTML.ElementFromURL(url, encoding='utf8')
+    node = html.xpath('./script')[0].text_content().strip()
+    Log.Debug('node = %s' %node)
+    url64 = Regex('ie11=\'(.+?)\'').search(node).group(1)
+    Log.Debug('url64 = %s' %url64)
+    v_url = base64.b64decode(url64)
+    Log.Debug('v_url = %s' %v_url)
+
+    if v_url.startswith('rtmp'):
+        return IndirectResponse(VideoClipObject, key=RTMPVideoURL(v_url, live=True))
+    elif v_url.startswith('mms'):
+        return IndirectResponse(VideoClipObject, key=WindowsMediaVideoURL(v_url))
+    elif v_url.endswith('m3u8'):
+        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(v_url))
     else:
         raise Ex.MediaNotAvailable
