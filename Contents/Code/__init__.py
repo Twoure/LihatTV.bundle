@@ -113,8 +113,6 @@ def DirectoryList(category, page, genre=None, country=None):
         return MessageContainer('Warning', 'No %s Streams for %s %s List' %(stream, genre, category))
     elif total == 0 and not country == '':
         return MessageContainer('Warning', 'No %s Streams for %s %s List' %(stream, country, category))
-    else:
-        return MessageContainer('Warning', 'No %s Streams for %s List' %(stream, category))
 
     total_pgs = int(total/limit)
 
