@@ -71,13 +71,6 @@ def ValidatePrefs():
     Dict.Save()
 
 ####################################################################################################
-@route(PREFIX + '/messagepopup')
-def MessagePopUP():
-    return MessageContainer(
-        'Error',
-        'Domain %s offline. Please pick a different Domain.' %Prefs['domain'])
-
-####################################################################################################
 @route(PREFIX + '/directoryopt')
 def DirectoryOpt(category):
     if Dict['domain_test'] == 'Fail':
@@ -127,20 +120,6 @@ def GenreList(category):
             title=genre, summary='%s %s List ' %(genre, category)
             ))
 
-    #Log('Genres = %s' %genres)
-
-    """
-    html = HTML.ElementFromURL('http://lihattv.com/admin/list.php')
-    #html = HTML.ElementFromURL('http://lihattv.com/admin/list.php?c=genre')
-
-    for genre in html.xpath('//option/text()'):
-        name = genre.title()
-        oc.add(DirectoryObject(
-            key=Callback(DirectoryList, category=category, genre=name, page=1),
-            title=name, summary='%s %s List ' %(name, category)
-            ))
-    """
-
     return oc
 
 ####################################################################################################
@@ -155,28 +134,6 @@ def CountryList(category):
 
     oc = ObjectContainer(title2=main_title)
 
-    """
-    stream = Prefs['format']
-    limit = 1
-
-    q = '/api/?q=html&channel=%s&stream=%s&limit=%i&page=1' %(category,  stream, limit)
-    url = 'http://' + Prefs['domain'] + q
-
-    html = HTML.ElementFromURL(url, encoding='utf8', errors='ignore')
-
-    countries = []
-    for node in html.xpath('//ol/li'):
-        node_text = node.text_content().strip()
-        r = Regex('^(.+).+\((.+)[:](.+?)\ .(.+?)\)').search(node_text).group(4).strip()
-        if not r in countries:
-            countries.append(r)
-
-    for country in sorted(countries):
-        oc.add(DirectoryObject(
-            key=Callback(DirectoryList, category=category, country=country, page=1),
-            title=country, summary='%s %s List ' %(country, category)
-            ))
-    """
     url = 'http://' + Prefs['domain'] + '/admin/list.php?c=country'
 
     html = HTML.ElementFromURL(url)
@@ -186,66 +143,8 @@ def CountryList(category):
             key=Callback(DirectoryList, category=category, country=name, page=1),
             title=name, summary='%s %s List ' %(name, category)
             ))
-    """
-    qevent = Thread.Event()
-    qevent.clear()
-
-    countries = []
-    for country in html.xpath('//option/text()'):
-        countries.append(country.title())
-
-    total = len(countries)
-
-    for i, c in enumerate(countries):
-        if i < total:
-            timer = float(Util.RandomInt(0,i)) + Util.Random()
-            Thread.CreateTimer(timer, country_list, category=category, country=c)
-        else:
-            Thread.CreateTimer(timer, country_list, category=category, country=c, qevent=qevent)
-
-    qevent.wait()
-
-    for fc in COUNTRIES:
-        oc.add(DirectoryObject(
-            key=Callback(DirectoryList, category=category, country=fc, page=1),
-            title=fc, summary='%s %s List ' %(fc, category)
-            ))
-    """
-    """
-        name = fc.title()
-        q = '/api/?q=xml&channel=%s&stream=%s&country=%s&limit=1&page=1' %(category, Dict['format'], name)
-        c_url = 'http://' + Prefs['domain'] + q
-        page_info = HTTP.Request(c_url).content.splitlines()
-        page_el = XML.ElementFromString(page_info[0] + page_info[-1])
-
-        if not int(page_el.get('total')) == 0:
-            oc.add(DirectoryObject(
-                key=Callback(DirectoryList, category=category, country=name, page=1),
-                title=name, summary='%s %s List ' %(name, category)
-                ))
-    """
 
     return oc
-
-####################################################################################################
-def country_list(category, country, qevent=None):
-    q = '/api/?q=xml&channel=%s&stream=%s&country=%s&limit=1&page=1' %(category, Dict['format'], country)
-    url = 'http://' + Prefs['domain'] + q
-    page_info = HTTP.Request(url).content.splitlines()
-    page_el = XML.ElementFromString(page_info[0] + page_info[-1])
-    if not qevent:
-        if not int(page_el.get('total')) == 0:
-            COUNTRIES.append(country)
-        Log('Current Country Count = %i' %len(COUNTRIES))
-        Log('Current Country List = %s' %COUNTRIES)
-    elif qevent:
-        if not int(page_el.get('total')) == 0:
-            COUNTRIES.append(country)
-        Log('Final Country Count = %i' %len(COUNTRIES))
-        Log('Final Country List = %s' %COUNTRIES)
-        qevent.set()
-
-    return
 
 ####################################################################################################
 @route(PREFIX + '/search')
@@ -277,8 +176,6 @@ def DirectoryList(category, page, genre='', country='', query=''):
             'Error',
             'Domain %s offline. Please pick a different Domain.' %Prefs['domain'])
 
-    #stream = 'mms'  # or 'rtmp' or 'm3u8'
-    #stream = Prefs['format']
     stream = Dict['format']
     limit = 500
 
@@ -335,12 +232,10 @@ def DirectoryList(category, page, genre='', country='', query=''):
 
     # setup url to parse xspf page
     q2 = '/api/?q=html&channel=%s&genre=%s&country=%s&stream=%s&search=%s&limit=%i&page=%i' %(category, genre, country, stream, query, limit, page)
-    #q2 = '/api/?q=xspf&channel=%s&genre=%s&country=%s&stream=%s&limit=%i&page=%i' %(category, genre, country, stream, limit, page)
     url2 = 'http://' + Prefs['domain'] + q2
 
     xml = HTML.ElementFromURL(url2, encoding='utf8', errors='ignore')
 
-    #for node in xml.xpath('//track'):
     for node in xml.xpath('//ol/li'):
         #Log('--------------------------------')
         title_text = node.text_content().strip()

@@ -24,10 +24,17 @@ def MetadataObjectForURL(url):
     added here - the object's key and rating_key properties will be synthesised based on the URL.
     """
 
-    #html = HTML.ElementFromURL(url, encoding='utf8')
-    html = HTML.ElementFromURL(url, encoding='iso-8859-1')
-    #title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()  #.decode('ISO-8859-1', errors='ignore')
-    title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
+    # pull down raw content to get title from Regex
+    html_page = HTTP.Request(url).content
+    title = Regex('\<title\>(.*?)\<\/title\>').search(html_page).group(1).split('|')[-1].strip()
+    Log('title from Regex = %s' %title)
+
+    # format raw content into html element for parsing
+    html = HTML.ElementFromString(html_page)
+
+    # old title, had encoding error
+    old_title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
+    Log('title from HTML.ElementFromString = %s' %old_title)
 
     player_node = html.xpath('//div[@id="player"]')[0]
     try:
@@ -83,17 +90,10 @@ def MetadataObjectForURL(url):
         %(title, summary, genre, country, str(year), views, str(date), thumb, art)
         )
 
-    #if genre and country:
     summary = (
         'Views %s | Genre: %s | Country: %s\n\n'
         %(views, genre[0] if genre else "", country[0] if country else "") + summary
         ).strip()
-    """
-    elif genre and not country:
-        summary = ('Views: %s | Genre: %s\n\n' %(views, genre[0]) + summary).strip()
-    elif country and not genre:
-        summary = ('Views: %s | Country: %s\n\n' %(views, country[0]) + summary).strip()
-    """
 
     vco = VideoClipObject(
         title=title,
@@ -105,7 +105,6 @@ def MetadataObjectForURL(url):
         art=art,
         thumb=thumb)
 
-    #return VideoClipObject(title=title, thumb='http://i.imgur.com/3EhTuzX.png', art='http://i.imgur.com/DKbNVLO.jpg')
     return vco
 
 ####################################################################################################
