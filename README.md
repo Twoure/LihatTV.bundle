@@ -1,172 +1,56 @@
-# LihatTV.bundle
+LihatTV.bundle
+==============
+
 Fork of the official [LihatTV](http://lihattv.com/) Plex bundle.
 Developing this Channel for better implementation in [Plex Media Server](https://plex.tv).
+This is a plugin that creates a new channel in [Plex Media Server](https://plex.tv) to view content from [LihatTV](http://lihattv.com/). It is currently under development and as such, should be considered alpha software and potentially unstable.
 
-#### Plans
-Create three main categories "Movies" "TV" and "Radio" and include a search function.
-Each category will have is own sub-genres and be limited to a number of items per page.
-Also plan to have a bookmarking function to create a personal list of favorite links.
-***
+**Note:** the author of this plugin has no affiliation with [LihatTV](http://lihattv.com/) nor the owners of the content that they host.
 
-## API Documentation
+Features
+--------
 
-### Syntax
+- Watch Live IPTV & Radio streams
+- Select streams (m3u8, mms, or rtmp)
+- Search
+- Bookmarks
 
-```
-http://{domain}/api/?q={query}  >>  http://lihattv.com/api/?q=islogin
-```
-pick one domain you like:
+Channel Support
+---------------
 
-* lihattv.us
-* lihattv.tv
-* lihattv.tk
-* lihattv.cf
-* lihattv.ga
-* lihattv.gq
-* lihattv.ml
-* lihattv.com
-* lihattv.co.in
-* lihattv.co.id
-* lihattv.co.uk
-* 7dplxsxxh54rxp4n.onion
+#####**Plex Media Server:**
+- Streams
+  - mms:  Requires Silverlight
+  - rtmp: Not Sure on requirements
+  - m3u8: No requirements
+- Tested Working:
+  - Ubuntu 14.04 LTS: PMS version 0.9.12.19
+  - Windows 7 & 10: PMS version 0.9.12.13
 
----
+#####**Plex Clients:**
+- Tested Working:
+  - Plex Home Theater (Ubuntu 14.04 LTS, and Windows 7 & 10) (m3u8)
+  - Android (4.4.2) (m3u8)
+  - Plex/Web (2.4.23) (m3u8, rtmp)
+- Not Working:
+  - Chromecast (m3u8, rtmp, mms)
+  - Android (4.4.2) (rtmp, mms)
 
-### Basic Query
-```bash
-islogin # Knowing login status.
-# result:
-$ltv_id="23";$ltv_email="you@email.com";$ltv_poin="13";$ltv_level="1";
-```
-```bash
-stats # Get user statistics.
-# result:
-$ltv_submit=0;$ltv_poin=11;
-```
-```bash
-login&e={email}&p={password} # Access log in or sign up function.
-# result (new account):
-$ltv_status="new";
-# result (un-activated):
-$ltv_status="confirm";
-# result (error in email or password):
-$ltv_status="error";
-# result (has log in):
-$ltv_status="loged";
-# result (login account):
-$ltv_status="26|username|email|***|11|1";
-```
-```bash
-logout # Access log out function.
-# no result
-```
----
+How To Install
+--------------
 
-### Result Query
+- [Download](https://github.com/Twoure/LihatTV.bundle/archive/master.zip) and install it by following the Plex [instructions](https://support.plex.tv/hc/en-us/articles/201187656-How-do-I-manually-install-a-channel-) or the instructions below.
+- Unzip and rename the folder to "LihatTV.bundle"
+- Copy LihatTV.bundle into the PMS [Plug-ins](https://support.plex.tv/hc/en-us/articles/201106098-How-do-I-find-the-Plug-Ins-folder-) directory
+- ~~Restart PMS~~ **This is old, should not have to restart PMS.  If channel does not appear then Restart PMS**
 
-<table>
-<thead>
-<tr>
-<th>Query</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>html&{parameter}</td>
-<td>Generate database list show in HTML with play link.</td>
-</tr>
-<tr>
-<td>xml&{parameter}</td>
-<td>Generate database list via standard XML format.</td>
-</tr>
-<tr>
-<td>rss&{parameter}</td>
-<td>Generate database list via RSS (Rich Site Summary) format.</td>
-</tr>
-<tr>
-<td>m3u&{parameter}</td>
-<td>Generate database list via Winamp playlist format.</td>
-</tr>
-<tr>
-<td>pls&{parameter}</td>
-<td>Generate database list via SHOUTcast playlist format.</td>
-</tr>
-<tr>
-<td>asx | wax | wvx &{parameter}</td>
-<td>Generate database list via Microsoft playlist format.</td>
-</tr>
-<tr>
-<td>kpl&{parameter}</td>
-<td>Generate database list via Kazaa or KM-Player playlist format.</td>
-</tr>
-<tr>
-<td>dpl&{parameter}</td>
-<td>Generate database list via Daum PotPlayer format.</td>
-</tr>
-<tr>
-<td>qpl&{parameter}</td>
-<td>Generate database list via QPPlaylist format.</td>
-</tr>
-<tr>
-<td>wpl&{parameter}</td>
-<td>Generate database list via Windows Media Player playlist format.</td>
-</tr>
-<tr>
-<td>fs&{parameter}</td>
-<td>Generate database list via FreeSmith Player playlist format.</td>
-</tr>
-<tr>
-<td>aimp2 | aimp3 &{parameter}</td>
-<td>Generate database list via AIMP2 or AIMP3 playlist format.</td>
-</tr>
-<tr>
-<td>smil&{parameter}</td>
-<td>Generate database list via W3C format.</td>
-</tr>
-<tr>
-<td>xspf&{parameter}</td>
-<td>Generate database list via Xiph.Org Foundation playlist format.</td>
-</tr>
-<tr>
-<td>xbmc&{parameter}</td>
-<td>Generate database list via standard Kodi/XBMC playlist addons.</td>
-</tr>
-</tbody>
-</table>
+Known Issues
+------------
+- Channel = Movies, mp4 streams are old style google picasa links with set timeout.  Most links have expired
+- Stream = mms, requires silverlight.  May work on Windows OS, but need to test first
+- Stream = rtmp, shows up on Plex Web client but not Android
 
-___
-#### Details of parameter:
+ChangeLog
+---------
 
-```
-limit={max result a page}
-
-page={page number}
-
-search={search query}
-
-channel={radio,tv,movies}
-
-format={audio,flash,hls,webm,torrent,xbmc,vlc,wmp}
-
-genre={adult,movies,news,kids,sport,etc...}
-
-country={turkey,uae,uk,usa,dubai,etc...}
-
-year={1997,2015,etc...}
-
-stream={url/streamer addresses}
-```
-
-parameter is optional, you can use or not. default limit is 40 list a page, for example:
-```
-http://lihattv.com/api/?q=xml&search=!tb
-
-http://lihattv.com/api/?q=asx&stream=mms://
-
-http://lihattv.com/api/?q=kpl&format=webm
-
-http://lihattv.com/api/?q=m3u&genre=news&limit=200
-
-http://lihattv.com/api/?q=html&channel=movies&format=webm&limit=500
-```
+**0.00** - 11/01/15 - Uploaded Fork of LihatTV.bundle from LihatTV site.  Added API documentation, refer to "ref" branch for original.

@@ -5,5 +5,12 @@
     "type": "enum",
     "values": ["m3u8", "mms", "rtmp"],
     "default": "m3u8"
+  },
+  {
+    "id": "domain",
+    "label": "Domain",
+    "type": "enum",
+    "values": ["lihattv.us", "lihattv.tv", "lihattv.tk", "lihattv.cf", "lihattv.ga", "lihattv.gq", "lihattv.ml", "lihattv.com", "lihattv.co.in", "lihattv.co.id", "lihattv.co.uk"],
+    "default": "lihattv.com"
   }
 ]
