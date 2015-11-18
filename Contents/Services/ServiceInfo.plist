@@ -10,7 +10,7 @@
       <string>com.plexapp.plugins.lihattv</string>
       <key>URLPatterns</key>
       <array>
-        <string>^http://lihattv\.(?:[^/]+\/)?\?play=(\d+)$</string>
+        <string>^http://lihattv\.(?:[^/]+\/)?\?(?:play|player)\=(\d+)$</string>
       </array>
       <key>TestURLs</key>
       <array>

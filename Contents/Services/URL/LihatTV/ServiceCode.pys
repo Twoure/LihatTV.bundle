@@ -8,6 +8,12 @@ import base64
 def NormalizeURL(url):
     """This function should return a 'normalised' version of the given URL. Plex uses the URL"""
 
+    if 'player' in url:
+        url_node = url.split('?')
+        url_base = url_node[0]
+        url_id = url_node[1].split('=')[1]
+        return url_base + '?play=' + url_id
+
     return url
 
 ####################################################################################################
@@ -18,10 +24,89 @@ def MetadataObjectForURL(url):
     added here - the object's key and rating_key properties will be synthesised based on the URL.
     """
 
-    html = HTML.ElementFromURL(url, encoding='utf8')
-    title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()  #.decode('ISO-8859-1', errors='ignore')
+    #html = HTML.ElementFromURL(url, encoding='utf8')
+    html = HTML.ElementFromURL(url, encoding='iso-8859-1')
+    #title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()  #.decode('ISO-8859-1', errors='ignore')
+    title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
 
-    return VideoClipObject(title=title, thumb='http://i.imgur.com/3EhTuzX.png', art='http://i.imgur.com/DKbNVLO.jpg')
+    player_node = html.xpath('//div[@id="player"]')[0]
+    try:
+        art = player_node.get('style').split('background-image:url')[-1].lstrip('\(\'').rstrip('\'\)\;\"')
+        if not art:
+            art = 'http://i.imgur.com/DKbNVLO.jpg'
+    except:
+        art = 'http://i.imgur.com/DKbNVLO.jpg'
+
+    thumb_node = player_node.xpath('.//script')[0].text_content().split(';')
+    thumb = 'http://i.imgur.com/3EhTuzX.png'
+    for item in thumb_node:
+        if 'ChannelPoster' in item:
+            thumb = item.split('ChannelPoster=')[-1].strip('\'')
+            if not thumb:
+                thumb = 'http://i.imgur.com/3EhTuzX.png'
+            break
+
+    detail_node = player_node.xpath('.//div[@class="detail hide"]')
+    summary = ""
+    genre = []
+    country = []
+    year = None
+    date = None
+    views = None
+    if detail_node:
+        summary_node = detail_node[0].xpath('./div')
+        if summary_node:
+            summary = summary_node[0].text_content().strip().capitalize()
+
+        genre_node = detail_node[0].xpath('./span[@class="genre"]')
+        if genre_node:
+            genre = [genre_node[0].text]
+
+        country_node = detail_node[0].xpath('./span[@class="country"]')
+        if country_node:
+            country = [country_node[0].text]
+
+        year_node = detail_node[0].xpath('./span[@class="year"]')
+        if year_node:
+            year = int(year_node[0].text)
+
+        date_node = detail_node[0].xpath('./span[@class="date"]')
+        if date_node:
+            date = Datetime.ParseDate(date_node[0].text)
+
+        view_node = detail_node[0].xpath('./span[@class="view"]')
+        if view_node:
+            views = view_node[0].text.split(' Views')[0]
+
+    Log(
+        '\ntitle = %s\nsummary = %s\ngenres = %s\ncountry = %s\nyear = %s\nViews = %s\ndate = %s\nthumb = %s\nart = %s'
+        %(title, summary, genre, country, str(year), views, str(date), thumb, art)
+        )
+
+    #if genre and country:
+    summary = (
+        'Views %s | Genre: %s | Country: %s\n\n'
+        %(views, genre[0] if genre else "", country[0] if country else "") + summary
+        ).strip()
+    """
+    elif genre and not country:
+        summary = ('Views: %s | Genre: %s\n\n' %(views, genre[0]) + summary).strip()
+    elif country and not genre:
+        summary = ('Views: %s | Country: %s\n\n' %(views, country[0]) + summary).strip()
+    """
+
+    vco = VideoClipObject(
+        title=title,
+        summary=summary,
+        genres=genre,
+        countries=country,
+        year=year,
+        originally_available_at=date,
+        art=art,
+        thumb=thumb)
+
+    #return VideoClipObject(title=title, thumb='http://i.imgur.com/3EhTuzX.png', art='http://i.imgur.com/DKbNVLO.jpg')
+    return vco
 
 ####################################################################################################
 def MediaObjectsForURL(url):
@@ -61,4 +146,7 @@ def PlayVideo(url, **kwargs):
     elif v_url.endswith('m3u8'):
         return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(v_url))
     else:
-        raise Ex.MediaNotAvailable
+        try:
+            return IndirectResponse(VideoClipObject, key=v_url)
+        except:
+            raise Ex.MediaNotAvailable
