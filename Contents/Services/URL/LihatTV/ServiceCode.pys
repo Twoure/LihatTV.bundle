@@ -2,17 +2,23 @@
 
 """lihattv Service Code"""
 
-import base64
+import base64, os
 
 ####################################################################################################
 def NormalizeURL(url):
     """This function should return a 'normalised' version of the given URL. Plex uses the URL"""
+
+    Log.Debug('*' * 80)
+    Log.Debug('* NormalizeURL before = %s' %url)
 
     if 'player' in url:
         url_node = url.split('?')
         url_base = url_node[0]
         url_id = url_node[1].split('=')[1]
         return url_base + '?play=' + url_id
+
+    Log.Debug('* NormalizeURL after = %s' %url)
+    Log.Debug('*' * 80)
 
     return url
 
@@ -24,17 +30,21 @@ def MetadataObjectForURL(url):
     added here - the object's key and rating_key properties will be synthesised based on the URL.
     """
 
+    Log.Debug('*' * 80)
+    Log.Debug('* MetadataObjectForURL = %s' %url)
+
     # pull down raw content to get title from Regex
     html_page = HTTP.Request(url).content
     title = Regex('\<title\>(.*?)\<\/title\>').search(html_page).group(1).split('|')[-1].strip()
-    Log('title from Regex = %s' %title)
+    Log.Debug('*' * 80)
+    Log.Debug('* title from Regex = %s' %title)
 
     # format raw content into html element for parsing
     html = HTML.ElementFromString(html_page)
 
     # old title, had encoding error
     old_title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
-    Log('title from HTML.ElementFromString = %s' %old_title)
+    Log.Debug('* title from HTML.ElementFromString = %s' %old_title)
 
     player_node = html.xpath('//div[@id="player"]')[0]
     try:
@@ -85,13 +95,20 @@ def MetadataObjectForURL(url):
         if view_node:
             views = view_node[0].text.split(' Views')[0]
 
-    Log(
-        '\ntitle = %s\nsummary = %s\ngenres = %s\ncountry = %s\nyear = %s\nViews = %s\ndate = %s\nthumb = %s\nart = %s'
-        %(title, summary, genre, country, str(year), views, str(date), thumb, art)
-        )
+    Log.Debug('*' * 80)
+    Log.Debug('* title = %s' %title)
+    Log.Debug('* summary = %s' %summary)
+    Log.Debug('* genres = %s' %genre)
+    Log.Debug('* country = %s' %country)
+    Log.Debug('* year = %s' %str(year))
+    Log.Debug('* Views = %s' %views)
+    Log.Debug('* date = %s' %str(date))
+    Log.Debug('* thumb = %s' %thumb)
+    Log.Debug('* art = %s'%art)
+    Log.Debug('*' * 80)
 
     summary = (
-        'Views %s | Genre: %s | Country: %s\n\n'
+        'Views: %s | Genre: %s | Country: %s\n\n'
         %(views, genre[0] if genre else "", country[0] if country else "") + summary
         ).strip()
 
@@ -100,6 +117,7 @@ def MetadataObjectForURL(url):
         summary=summary,
         genres=genre,
         countries=country,
+        content_rating='X' if 'Adult' in genre else None,
         year=year,
         originally_available_at=date,
         art=art,
@@ -115,8 +133,14 @@ def MediaObjectsForURL(url):
     location requires additional computation.
     """
 
+    Log.Debug('*' * 80)
+    Log.Debug('* MediaObjectsForURL = %s' %url)
+    Log.Debug('*' * 80)
+
     mo = [MediaObject(
         parts=[PartObject(key=Callback(PlayVideo, url=url))],
+        #protocol='rtmp',
+        #protocol='hls',
         container=Container.MP4,
         video_codec=VideoCodec.H264,
         audio_codec=AudioCodec.AAC,
@@ -130,22 +154,68 @@ def MediaObjectsForURL(url):
 def PlayVideo(url, **kwargs):
     """Format the video url depending on mms, rtmp, or m3u8"""
 
+    Log.Debug('*' * 80)
+    Log.Debug('* PlayVideo start url = %s' %url)
+
     html = HTML.ElementFromURL(url, encoding='utf8')
+    Log.Debug('*' * 80)
     node = html.xpath('./script')[0].text_content().strip()
-    Log.Debug('node = %s' %node)
+    Log.Debug('* node = %s' %node)
     url64 = Regex('ie11=\'(.+?)\'').search(node).group(1)
-    Log.Debug('url64 = %s' %url64)
-    v_url = base64.b64decode(url64)
-    Log.Debug('v_url = %s' %v_url)
+    Log.Debug('* url64 = %s' %url64)
+    v_url = base64.b64decode(url64).strip()
+    Log.Debug('* v_url = %s' %v_url)
+    v_url_base, v_url_extension = os.path.splitext(v_url)
+    Log.Debug('* (v_url_base, v_url_extension) = (%s, %s)' %(v_url_base, v_url_extension))
+    Log.Debug('*' * 80)
 
     if v_url.startswith('rtmp'):
-        return IndirectResponse(VideoClipObject, key=RTMPVideoURL(v_url, live=True))
+        Log.Debug('* url after processing: %s' %v_url)
+        if 'swfUrl' in v_url:
+            test_one = v_url.split(' ')
+            for part in test_one:
+                if 'rtmp:' in part:
+                    player = part.split('=')[-1]
+                elif 'swfUrl' in part:
+                    swf_url = part.split('=')[-1]
+            try:
+                Log.Debug('*' * 80)
+                Log.Debug('* rtmp test one')
+                Log.Debug('* url = %s' %player)
+                Log.Debug('* swf_url = %s' %swf_url)
+                Log.Debug('*' * 80)
+                return IndirectResponse(VideoClipObject, key=RTMPVideoURL(url=player, swf_url=swf_url))
+            except:
+                try:
+                    Log.Debug('*' * 80)
+                    Log.Debug('* rtmp test two')
+                    Log.Debug('* url = %s' %player)
+                    Log.Debug('* swf_url = %s' %swf_url)
+                    Log.Debug('*' * 80)
+                    return IndirectResponse(VideoClipObject, key=RTMPVideoURL(url=player))
+                except:
+                    Log.Debug('*' * 80)
+                    Log.Debug('* rtmp failed')
+                    Log.Debug('*' * 80)
+                    raise Ex.MediaNotAvailable
+        #return IndirectResponse(VideoClipObject, key=RTMPVideoURL(v_url, live=True))
+        else:
+            return IndirectResponse(VideoClipObject, key=RTMPVideoURL(url=v_url))
     elif v_url.startswith('mms'):
+        Log.Debug('* url after processing: %s' %WindowsMediaVideoURL(url=v_url))
+        Log.Debug('*' * 80)
         return IndirectResponse(VideoClipObject, key=WindowsMediaVideoURL(v_url))
-    elif v_url.endswith('m3u8'):
+    elif v_url_extension == '.m3u8':
+        Log.Debug('* url after processing: %s' %HTTPLiveStreamURL(url=v_url))
+        Log.Debug('*' * 80)
         return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(v_url))
     else:
         try:
+            Log.Debug('* Video is not a live stream | %s' %v_url)
+            Log.Debuy('* Try to play video directly')
+            Log.Debug('*' * 80)
             return IndirectResponse(VideoClipObject, key=v_url)
         except:
+            Log.Error('* Invalid Video URL | %s' %v_url)
+            Log.Error('*' * 80)
             raise Ex.MediaNotAvailable
