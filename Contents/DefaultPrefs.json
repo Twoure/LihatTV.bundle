@@ -12,5 +12,17 @@
     "type": "enum",
     "values": ["lihattv.us", "lihattv.tv", "lihattv.tk", "lihattv.cf", "lihattv.ga", "lihattv.gq", "lihattv.ml", "lihattv.com", "lihattv.co.in", "lihattv.co.id", "lihattv.co.uk"],
     "default": "lihattv.com"
+  },
+  {
+    "id": "adult",
+    "label": "Allow Adult Content",
+    "type": "bool",
+    "default": "False"
+  },
+  {
+    "id": "debug",
+    "label": "Enable Debug Logging",
+    "type": "bool",
+    "default": "True"
   }
 ]
