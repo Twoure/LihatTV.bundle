@@ -8,17 +8,11 @@ import base64, os
 def NormalizeURL(url):
     """This function should return a 'normalised' version of the given URL. Plex uses the URL"""
 
-    Log.Debug('*' * 80)
-    Log.Debug('* NormalizeURL before = %s' %url)
-
     if 'player' in url:
         url_node = url.split('?')
         url_base = url_node[0]
         url_id = url_node[1].split('=')[1]
         return url_base + '?play=' + url_id
-
-    Log.Debug('* NormalizeURL after = %s' %url)
-    Log.Debug('*' * 80)
 
     return url
 
@@ -61,6 +55,8 @@ def MetadataObjectForURL(url):
             thumb = item.split('ChannelPoster=')[-1].strip('\'')
             if not thumb:
                 thumb = 'http://i.imgur.com/3EhTuzX.png'
+            elif not thumb.startswith('http'):
+                thumb = 'http://' + thumb
             break
 
     detail_node = player_node.xpath('.//div[@class="detail hide"]')
@@ -69,7 +65,7 @@ def MetadataObjectForURL(url):
     country = []
     year = None
     date = None
-    views = None
+    views = ""
     if detail_node:
         summary_node = detail_node[0].xpath('./div')
         if summary_node:
@@ -97,6 +93,7 @@ def MetadataObjectForURL(url):
 
     Log.Debug('*' * 80)
     Log.Debug('* title = %s' %title)
+    Log.Debug('* id = %s' %url.split('=')[1])
     Log.Debug('* summary = %s' %summary)
     Log.Debug('* genres = %s' %genre)
     Log.Debug('* country = %s' %country)
@@ -108,8 +105,8 @@ def MetadataObjectForURL(url):
     Log.Debug('*' * 80)
 
     summary = (
-        'Views: %s | Genre: %s | Country: %s\n\n'
-        %(views, genre[0] if genre else "", country[0] if country else "") + summary
+        'ID: %s | Genre: %s | Country: %s | Views: %s\n\n'
+        %(url.split('=')[1], genre[0] if genre else "", country[0] if country else "", views) + summary
         ).strip()
 
     vco = VideoClipObject(
@@ -167,6 +164,11 @@ def PlayVideo(url, **kwargs):
     Log.Debug('* v_url = %s' %v_url)
     v_url_base, v_url_extension = os.path.splitext(v_url)
     Log.Debug('* (v_url_base, v_url_extension) = (%s, %s)' %(v_url_base, v_url_extension))
+    if '.m3u8?' in v_url_extension:
+        v_url_extension = v_url_extension.partition('?')[0]
+        Log.Debug('* cleaned v_url_extension = %s' %v_url_extension)
+    elif '.m3u8?' in v_url_base:
+        v_url_base = v_url_base.partition('?')[0]
     Log.Debug('*' * 80)
 
     if v_url.startswith('rtmp'):
@@ -200,15 +202,18 @@ def PlayVideo(url, **kwargs):
                     raise Ex.MediaNotAvailable
         #return IndirectResponse(VideoClipObject, key=RTMPVideoURL(v_url, live=True))
         else:
+            Log.Debug('*' * 80)
+            Log.Debug('* url after processing = %s' %RTMPVideoURL(url=v_url))
+            Log.Debug('*' * 80)
             return IndirectResponse(VideoClipObject, key=RTMPVideoURL(url=v_url))
     elif v_url.startswith('mms'):
         Log.Debug('* url after processing: %s' %WindowsMediaVideoURL(url=v_url))
         Log.Debug('*' * 80)
         return IndirectResponse(VideoClipObject, key=WindowsMediaVideoURL(v_url))
-    elif v_url_extension == '.m3u8':
-        Log.Debug('* url after processing: %s' %HTTPLiveStreamURL(url=v_url))
+    elif v_url_extension == '.m3u8' or v_url_base.endswith('.m3u8'):
+        Log.Debug('* url after processing: %s' %HTTPLiveStreamURL(url=v_url_base + v_url_extension))
         Log.Debug('*' * 80)
-        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(v_url))
+        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(v_url_base + v_url_extension))
     else:
         try:
             Log.Debug('* Video is not a live stream | %s' %v_url)
