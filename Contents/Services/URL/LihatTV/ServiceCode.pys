@@ -151,9 +151,6 @@ def MediaObjectsForURL(url):
 def PlayVideo(url, **kwargs):
     """Format the video url depending on mms, rtmp, or m3u8"""
 
-    Log.Debug('*' * 80)
-    Log.Debug('* PlayVideo start url = %s' %url)
-
     html = HTML.ElementFromURL(url, encoding='utf8')
     Log.Debug('*' * 80)
     node = html.xpath('./script')[0].text_content().strip()
@@ -211,9 +208,9 @@ def PlayVideo(url, **kwargs):
         Log.Debug('*' * 80)
         return IndirectResponse(VideoClipObject, key=WindowsMediaVideoURL(v_url))
     elif v_url_extension == '.m3u8' or v_url_base.endswith('.m3u8'):
-        Log.Debug('* url after processing: %s' %HTTPLiveStreamURL(url=v_url_base + v_url_extension))
+        Log.Debug('* url after processing: %s' %HTTPLiveStreamURL(url=(v_url_base + v_url_extension).strip()))
         Log.Debug('*' * 80)
-        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(v_url_base + v_url_extension))
+        return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL((v_url_base + v_url_extension).strip()))
     else:
         try:
             Log.Debug('* Video is not a live stream | %s' %v_url)
