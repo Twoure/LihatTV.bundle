@@ -1,12 +1,5 @@
 [
   {
-    "id": "format",
-    "label": "Select Stream Type",
-    "type": "enum",
-    "values": ["m3u8", "mms", "rtmp"],
-    "default": "m3u8"
-  },
-  {
     "id": "domain",
     "label": "Domain",
     "type": "enum",
