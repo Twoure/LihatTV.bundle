@@ -15,15 +15,14 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 
 ##### Plex Media Server:
 - Tested Working:
-  - Ubuntu 14.04 LTS: PMS version 0.9.14.3
+  - Ubuntu 14.04 LTS: PMS version 0.9.14.4
   - Windows 7 & 10: PMS version 0.9.12.13
 
 ##### Plex Clients:
 - Tested Working:
   - Plex Home Theater (Ubuntu 14.04 LTS, and Windows 7 & 10)
-  - Android (4.4.2)
+  - Android (KitKat 4.4.2)
   - Plex/Web (2.4.23)
-- Not Working:
   - Chromecast
 
 ## How To Install
@@ -35,11 +34,11 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 
 ## Issues
 
-- Channel = Movies, mp4 streams are old style Google Picasa links with set timeout.  Most links have expired
-- Removed options for `mms` and `rtmp` streams.  Too many issues with compatibility in Plex Framework.
+- Channel = Movies, mp4 streams are old style Google Picasa links with set timeout.  Most links have expired.
+- Removed options for `mms` and `rtmp` streams.  Too many issues with compatibility in Plex Framework. May add back later.
 
 ## ChangeLog
 
-**1.0.0** - 11/25/15 - First Release of LihatTV.bundle
+**1.0.0** - 11/27/15 - First Release of LihatTV.bundle
 
 **0.0.0** - 11/01/15 - Uploaded Fork of LihatTV.bundle from LihatTV site.  Added API documentation, refer to "ref" branch for original.

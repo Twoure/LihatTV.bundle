@@ -9,7 +9,7 @@ PREFIX = '/video/lihattv'
 
 # set background art and icon defaults
 ICON = 'icon-default.png'
-ART = 'art-default.jpg'  #need better art
+ART = 'art-default.jpg'
 VIDEO_THUMB = 'icon.genre.png'
 PREFS_ICON = 'icon.tools.png'
 
@@ -46,15 +46,6 @@ def MainMenu():
 @route(PREFIX + '/validateprefs', start=bool)
 def ValidatePrefs(start=False):
     """Validate domain"""
-
-    """
-    if Prefs['format'] == 'mms':
-        Dict['format'] = 'mms://'
-    elif Prefs['format'] == 'rtmp':
-        Dict['format'] = 'rtmp://'
-    elif Prefs['format'] == 'm3u8':
-        Dict['format'] = '.m3u8'
-    """
 
     # Test domain url
     if not Dict['domain']:
@@ -234,7 +225,6 @@ def Search(query=''):
 
     search = String.Quote(query, usePlus=True)
 
-    #q = '/api/?q=xml&channel=TV&stream=%s&search=%s&limit=1&page=1' %(Dict['format'], query)
     q = '/api/?q=xml&channel=TV&stream=.m3u8&search=%s&limit=1&page=1' %query
     url = 'http://' + Prefs['domain'] + q
     page_info = HTTP.Request(url).content.splitlines()
@@ -257,7 +247,6 @@ def DirectoryList(page, genre='', country='', query=''):
     if not test:
         return message
 
-    #stream = Dict['format']
     stream = '.m3u8'
     limit = 500
 
