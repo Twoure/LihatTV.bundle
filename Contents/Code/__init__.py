@@ -1,10 +1,7 @@
-####################################################################################################
-#                                                                                                  #
-#                               LihatTV Plex Channel -- v1.0.0                                     #
-#                                                                                                  #
-####################################################################################################
+from updater import Updater
+
 # set global variables
-TITLE = 'LihatTV'
+TITLE = L('title')
 PREFIX = '/video/lihattv'
 
 # set background art and icon defaults
@@ -30,8 +27,9 @@ def Start():
 ####################################################################################################
 @handler(PREFIX, TITLE, ICON, ART)
 def MainMenu():
-    oc = ObjectContainer(title2=TITLE)
+    oc = ObjectContainer(title2=TITLE, no_cache=True)
 
+    Updater(PREFIX + '/updater', oc)
     oc.add(DirectoryObject(key=Callback(DirectoryList, page=1), title='All'))
     oc.add(DirectoryObject(key=Callback(CountryList), title='Countries'))
     oc.add(DirectoryObject(key=Callback(GenreList), title='Genres'))
@@ -164,7 +162,6 @@ def GenreList():
     main_title = 'Genres'
     oc = ObjectContainer(title2=main_title)
 
-    #stream = Dict['format']
     stream = '.m3u8'
     limit = 10000
     q = '/api/?q=html&channel=TV&stream=%s&limit=%i&page=1' %(stream, limit)
@@ -368,23 +365,32 @@ def VideoOptionPage(video_info):
     if not test:
         return message
 
-    v_url = video_info['url']
-    if 'player' in v_url:
-        url_node = v_url.split('?')
-        url_base = url_node[0]
-        url_id = url_node[1].split('=')[1]
-        v_url = url_base + '?play=' + url_id
+    genre = video_info['genres'][0] if video_info['genres'] else 'Unknown'
+    bm = Dict['Bookmarks']
+    match = False
+    description = None
 
-    html = HTML.ElementFromURL(v_url)
-    description = html.xpath('//head/meta[@name="description"]')[0].get('content')
-    Logger('*' * 80)
-    if description == '404: THIS CHANNEL NOT FOUND':
-        Logger('* 404 Channel. \"%s | %s\" Channel not found' %(video_info['id'], video_info['title']))
-        oc = ObjectContainer(
-            title2=video_info['title'], header='Warning',
-            message='\"%s | %s\" Channel Offline. Try again later.' %(video_info['id'], video_info['title'])
-            )
-    else:
+    if ((next((g['id'] for g in bm[genre] if g['id'] == video_info['id']), False)) if genre in bm.keys() else False) if bm else False:
+        match = True
+
+        v_url = video_info['url']
+        if 'player' in v_url:
+            url_node = v_url.split('?')
+            url_base = url_node[0]
+            url_id = url_node[1].split('=')[1]
+            v_url = url_base + '?play=' + url_id
+
+        html = HTML.ElementFromURL(v_url)
+        description = html.xpath('//head/meta[@name="description"]')[0].get('content')
+        Logger('*' * 80)
+        if description == '404: THIS CHANNEL NOT FOUND':
+            Logger('* 404 Channel. \"%s | %s\" Channel not found' %(video_info['id'], video_info['title']))
+            oc = ObjectContainer(
+                title2=video_info['title'], header='Warning',
+                message='\"%s | %s\" Channel Offline. Try again later.' %(video_info['id'], video_info['title'])
+                )
+
+    if description != '404: THIS CHANNEL NOT FOUND':
         Logger('* \"%s | %s\" Channel Online.' %(video_info['id'], video_info['title']))
         oc = ObjectContainer(title2=video_info['title'])
 
@@ -399,40 +405,16 @@ def VideoOptionPage(video_info):
             url=video_info['url']
             ))
 
-    genre = video_info['genres'][0] if video_info['genres'] else 'Unknown'
-
     Logger('*' * 80)
-    if Dict['Bookmarks']:
-        if genre in Dict['Bookmarks'].keys():
-            Logger('* %s genre found' %genre)
-            bm_g = Dict['Bookmarks'][genre]
-            for i, g in enumerate(bm_g):
-                if not video_info['id'] == g['id'] and len(bm_g) != i+1:
-                    continue
-                elif video_info['id'] == g['id']:
-                    Logger('* Remove \"%s | %s\" from bookmarks' %(video_info['id'], video_info['title']))
-                    oc.add(DirectoryObject(
-                        key=Callback(RemoveBookmark, video_info=video_info),
-                        title='Remove Bookmark',
-                        summary='Remove \"%s | %s\" from your Bookmarks list.' %(video_info['id'], video_info['title'])
-                        ))
-                    break
-                elif len(bm_g) == i+1:
-                    Logger('* Add \"%s | %s\" to bookmarks' %(video_info['id'], video_info['title']))
-                    oc.add(DirectoryObject(
-                        key=Callback(AddBookmark, video_info=video_info),
-                        title='Add Bookmark',
-                        summary='Add \"%s | %s\" to your Bookmarks list.' %(video_info['id'], video_info['title'])
-                        ))
-        else:
-            Logger('* %s genre not in Dict[\'Bookmarks\'].keys()' %genre)
-            oc.add(DirectoryObject(
-                key=Callback(AddBookmark, video_info=video_info),
-                title='Add Bookmark',
-                summary='Add \"%s | %s\" to your Bookmarks list.' %(video_info['id'], video_info['title'])
-                ))
+    if match:
+        Logger('* Remove \"%s | %s\" from bookmarks' %(video_info['id'], video_info['title']))
+        oc.add(DirectoryObject(
+            key=Callback(RemoveBookmark, video_info=video_info),
+            title='Remove Bookmark',
+            summary='Remove \"%s | %s\" from your Bookmarks list.' %(video_info['id'], video_info['title'])
+            ))
     else:
-        Logger('* No Dict[\'Bookmarks\'] yet. Create and add new bookmark')
+        Logger('* Add \"%s | %s\" to bookmarks' %(video_info['id'], video_info['title']))
         oc.add(DirectoryObject(
             key=Callback(AddBookmark, video_info=video_info),
             title='Add Bookmark',
@@ -454,36 +436,34 @@ def AddBookmark(video_info):
         'country': video_info['countries'], 'summary': video_info['summary'],
         'thumb': video_info['thumb'], 'art': video_info['art']
         }
+    bm = Dict['Bookmarks']
 
-    if not Dict['Bookmarks']:
-        Dict['Bookmarks'] = {genre: [new_bookmark]}
+    if not bm:
+        bm = {genre: [new_bookmark]}
         Dict.Save()
 
         return MessageContainer('Bookmarks',
             '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
-    elif genre in Dict['Bookmarks'].keys():
+    elif genre in bm.keys():
         Logger('*' * 80)
-        for i, bookmark in enumerate(Dict['Bookmarks'][genre]):
-            if not bookmark['id'] == new_bookmark['id'] and len(Dict['Bookmarks'][genre]) != i+1:
-                continue
-            elif bookmark['id'] == new_bookmark['id']:
-                Logger('* bookmark \"%s | %s\" already in your bookmarks' %(video_info['id'], video_info['title']), kind='Info')
-                Logger('*' * 80)
+        if (next((b['id'] for b in bm[genre] if b['id'] == video_info['id']), False)):
+            Logger('* bookmark \"%s | %s\" already in your bookmarks' %(video_info['id'], video_info['title']), kind='Info')
+            Logger('*' * 80)
 
-                return MessageContainer('Warning',
-                    '\"%s | %s\" is already in your bookmarks.' %(video_info['id'], video_info['title']))
-            elif len(Dict['Bookmarks'][genre]) == i+1:
-                temp = {}
-                temp.setdefault(genre, Dict['Bookmarks'][genre]).append(new_bookmark)
-                Dict['Bookmarks'][genre] = temp[genre]
-                Logger('* bookmark \"%s | %s\" has been appended to your %s bookmarks' %(video_info['id'], video_info['title'], genre), kind='Info')
-                Logger('*' * 80)
-                Dict.Save()
+            return MessageContainer('Warning',
+                '\"%s | %s\" is already in your bookmarks.' %(video_info['id'], video_info['title']))
+        else:
+            temp = {}
+            temp.setdefault(genre, bm[genre]).append(new_bookmark)
+            bm[genre] = temp[genre]
+            Logger('* bookmark \"%s | %s\" has been appended to your %s bookmarks' %(video_info['id'], video_info['title'], genre), kind='Info')
+            Logger('*' * 80)
+            Dict.Save()
 
-                return MessageContainer('Bookmarks',
-                    '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
+            return MessageContainer('Bookmarks',
+                '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
     else:
-        Dict['Bookmarks'].update({genre: [new_bookmark]})
+        bm.update({genre: [new_bookmark]})
         Dict.Save()
 
         return MessageContainer('Bookmarks',
@@ -498,48 +478,42 @@ def RemoveBookmark(video_info):
     then Remove the Bookmark Dictionary also
     """
     genre = video_info['genres'][0] if video_info['genres'] else 'Unknown'
+    bm = Dict['Bookmarks']
 
-    if Dict['Bookmarks']:
-        if genre in Dict['Bookmarks'].keys():
-            bm = Dict['Bookmarks'][genre]
-            Logger('*' * 80)
-            for i in xrange(len(bm)):
-                if bm[i]['id'] == video_info['id']:
-                    bm.pop(i)
-                    Dict.Save()
-                    Logger('* \"%s | %s\" has been removed from Bookmark List'
-                        %(video_info['id'], video_info['title']), kind='Info'
-                        )
-                    break
-
-            if len(bm) == 0:
-                Logger('* \"%s | %s\" bookmark was the last, so removed %s bookmark section'
-                    %(video_info['id'], video_info['title'], genre), force=True
-                    )
-                Logger('*' * 80)
-                del Dict['Bookmarks'][genre]
+    if ((next((b['id'] for b in bm[genre] if b['id'] == video_info['id']), False)) if genre in bm.keys() else False) if bm else False:
+        bm_g = bm[genre]
+        Logger('*' * 80)
+        for i in xrange(len(bm_g)):
+            if bm_g[i]['id'] == video_info['id']:
+                bm_g.pop(i)
                 Dict.Save()
+                Logger('* \"%s | %s\" has been removed from Bookmark List'
+                    %(video_info['id'], video_info['title']), kind='Info'
+                    )
+                break
 
-                return MessageContainer('Remove Bookmark',
-                    '\"%s | %s\" bookmark was the last, so removed %s bookmark section'
-                    %(video_info['id'], video_info['title'], genre)
-                    )
-            else:
-                return MessageContainer('Remove Bookmark',
-                    '\"%s | %s\" has been removed from your bookmarks.'
-                    %(video_info['id'], video_info['title'])
-                    )
-        else:
-            return MessageContainer(
-                'Bookmark Error',
-                'ERROR: \"%s | %s\" cannot be removed. The Bookmark Dictionary %s does not exist!'
+        if len(bm_g) == 0:
+            Logger('* \"%s | %s\" bookmark was the last, so removed %s bookmark section'
+                %(video_info['id'], video_info['title'], genre), force=True
+                )
+            Logger('*' * 80)
+            del bm_g
+            Dict.Save()
+
+            return MessageContainer('Remove Bookmark',
+                '\"%s | %s\" bookmark was the last, so removed %s bookmark section'
                 %(video_info['id'], video_info['title'], genre)
+                )
+        else:
+            return MessageContainer('Remove Bookmark',
+                '\"%s | %s\" has been removed from your bookmarks.'
+                %(video_info['id'], video_info['title'])
                 )
     else:
         return MessageContainer(
             'Bookmark Error',
-            'ERROR: \"%s | %s\" cannot be removed. The Bookmark Dictionary does not exist!'
-            %(video_info['id'], video_info['title'])
+            'ERROR: \"%s | %s\" cannot be removed. The Bookmark Dictionary %s does not exist!'
+            %(video_info['id'], video_info['title'], genre)
             )
 
 ####################################################################################################

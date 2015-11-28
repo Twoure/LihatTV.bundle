@@ -3,28 +3,20 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleIdentifier</key>
-    <string>com.plexapp.plugins.lihattv</string>
+  <string>com.plexapp.plugins.lihattv</string>
+  <key>CFBundleVersion</key>
+  <string>1.0.0</string>
+  <key>PlexPluginVersionUrl</key>
+  <string>https://api.github.com/repos/Twoure/LihatTV.bundle/releases/latest</string>
   <key>PlexClientPlatforms</key>
-    <string>*</string>
+  <string>*</string>
   <key>PlexFrameworkVersion</key>
-    <string>2</string>
+  <string>2</string>
   <key>PlexPluginConsoleLogging</key>
-    <string>1</string>
+  <string>1</string>
   <key>PlexPluginDevMode</key>
-    <string>1</string>
+  <string>1</string>
   <key>PlexPluginCodePolicy</key>
-    <string>Elevated</string>
-  <key>PlexMediaContainer</key>
-    <array>
-      <string>MP4</string>
-    </array>
-  <key>PlexVideoCodec</key>
-    <array>
-      <string>H.264</string>
-    </array>
-  <key>PlexAudioCodec</key>
-    <array>
-      <string>AAC</string>
-    </array>
+  <string>Elevated</string>
 </dict>
 </plist>
