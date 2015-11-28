@@ -439,7 +439,7 @@ def AddBookmark(video_info):
     bm = Dict['Bookmarks']
 
     if not bm:
-        bm = {genre: [new_bookmark]}
+        Dict['Bookmarks'] = {genre: [new_bookmark]}
         Dict.Save()
 
         return MessageContainer('Bookmarks',
@@ -455,7 +455,7 @@ def AddBookmark(video_info):
         else:
             temp = {}
             temp.setdefault(genre, bm[genre]).append(new_bookmark)
-            bm[genre] = temp[genre]
+            Dict['Bookmarks'][genre] = temp[genre]
             Logger('* bookmark \"%s | %s\" has been appended to your %s bookmarks' %(video_info['id'], video_info['title'], genre), kind='Info')
             Logger('*' * 80)
             Dict.Save()
@@ -463,7 +463,7 @@ def AddBookmark(video_info):
             return MessageContainer('Bookmarks',
                 '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
     else:
-        bm.update({genre: [new_bookmark]})
+        Dict['Bookmarks'].update({genre: [new_bookmark]})
         Dict.Save()
 
         return MessageContainer('Bookmarks',
