@@ -2,7 +2,12 @@
 
 """lihattv Service Code"""
 
-import base64, os, urllib2
+import base64, os, urllib2, io
+
+RESOURCES_PATH = os.path.join(
+    os.getcwd().lstrip('\?').split('Plug-in Support')[0],
+    'Plug-ins', 'LihatTV.bundle', 'Contents', 'Resources'
+    )
 
 ####################################################################################################
 def NormalizeURL(url):
@@ -36,25 +41,38 @@ def MetadataObjectForURL(url):
     html = HTML.ElementFromString(html_page)
 
     player_node = html.xpath('//div[@id="player"]')[0]
+    time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
     try:
         art = player_node.get('style').split('background-image:url')[-1].lstrip('\(\'').rstrip('\'\)\;\"')
         if not art:
-            time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
             art = '/:/plugins/com.plexapp.plugins.lihattv/resources/art-default.jpg?t=' + str(time_stamp)
     except:
-        time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
         art = '/:/plugins/com.plexapp.plugins.lihattv/resources/art-default.jpg?t=' + str(time_stamp)
 
     thumb_node = player_node.xpath('.//script')[0].text_content().split(';')
-    thumb = 'http://i.imgur.com/3EhTuzX.png'
+    thumb = '/:/plugins/com.plexapp.plugins.lihattv/resources/thumb-video.png?t=' + str(time_stamp)
     for item in thumb_node:
         if 'ChannelPoster' in item:
             thumb = item.split('ChannelPoster=')[-1].strip('\'')
             if not thumb:
-                time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
                 thumb = '/:/plugins/com.plexapp.plugins.lihattv/resources/thumb-video.png?t=' + str(time_stamp)
+            elif thumb == 'data:image/jpeg' or thumb == 'data:image/png':
+                continue
             elif not thumb.startswith('http'):
                 thumb = 'http://' + thumb
+            break
+        elif 'base64' in item:
+            filename = url.split('=')[-1] + '.jpg'
+
+            if os.path.isfile(os.path.join(RESOURCES_PATH, filename)):
+                thumb = '/:/plugins/com.plexapp.plugins.lihattv/resources/%s?t=%s' %(filename, str(time_stamp))
+            else:
+                img64 = item.lstrip('base64,').rstrip('\'')
+                imgdata = base64.b64decode(img64)
+                with io.open(os.path.join(RESOURCES_PATH, filename), 'wb') as f:
+                    f.write(imgdata)
+
+                thumb = '/:/plugins/com.plexapp.plugins.lihattv/resources/%s?t=%s' %(filename, str(time_stamp))
             break
 
     detail_node = player_node.xpath('.//div[@class="detail hide"]')

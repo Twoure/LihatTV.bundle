@@ -3,7 +3,7 @@
     "id": "domain",
     "label": "Domain",
     "type": "enum",
-    "values": ["lihattv.us", "lihattv.tv", "lihattv.tk", "lihattv.cf", "lihattv.ga", "lihattv.gq", "lihattv.ml", "lihattv.com", "lihattv.co.in", "lihattv.co.id", "lihattv.co.uk"],
+    "values": ["lihattv.us", "lihattv.tk", "lihattv.com", "lihattv.co.id", "lihattv.co.uk"],
     "default": "lihattv.com"
   },
   {

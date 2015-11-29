@@ -25,8 +25,6 @@ BOOKMARK_REMOVE_ICON = 'icon-remove-bookmark.png'
 SEARCH_ICON = 'icon-search.png'
 PREFS_ICON = 'icon-prefs.png'
 
-LIST_VIEW_CLIENTS = ['Android', 'iOS']
-
 ####################################################################################################
 def Start():
     HTTP.CacheTime = 0
@@ -69,7 +67,7 @@ def ValidatePrefs(start=False):
     if not Dict['domain']:
         Dict['domain'] = Prefs['domain']
 
-    if not Prefs['domain'] == Dict['domain'] or start:
+    if (Prefs['domain'] != Dict['domain']) or (start == True):
         Dict['domain'] = Prefs['domain']
         url = 'http://' + Prefs['domain'] + '/admin/list.php'
         try:
