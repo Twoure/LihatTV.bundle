@@ -140,7 +140,8 @@ def BookmarksSub(genre):
         else:
             oc.add(DirectoryObject(
                 key=Callback(VideoOptionPage, video_info=video_info),
-                title=video_info['title'], summary=video_info['summary'], tagline=video_info['tagline'],
+                title='%s | ID: %s' %(video_info['title'], video_info['id']),
+                summary=video_info['summary'], tagline=video_info['tagline'],
                 thumb=R(video_info['thumb']) if video_info['thumb'] else None,
                 art=R(video_info['art']) if video_info['art'] else None
                 ))
@@ -369,8 +370,9 @@ def VideoOptionPage(video_info):
     bm = Dict['Bookmarks']
     match = False
     description = None
+    Logger('*' * 80)
 
-    if ((next((g['id'] for g in bm[genre] if g['id'] == video_info['id']), False)) if genre in bm.keys() else False) if bm else False:
+    if ((True if [g['id'] for g in bm[genre] if g['id'] == video_info['id']] else False) if genre in bm.keys() else False) if bm else False:
         match = True
 
         v_url = video_info['url']
@@ -382,13 +384,13 @@ def VideoOptionPage(video_info):
 
         html = HTML.ElementFromURL(v_url)
         description = html.xpath('//head/meta[@name="description"]')[0].get('content')
-        Logger('*' * 80)
         if description == '404: THIS CHANNEL NOT FOUND':
             Logger('* 404 Channel. \"%s | %s\" Channel not found' %(video_info['id'], video_info['title']))
             oc = ObjectContainer(
                 title2=video_info['title'], header='Warning',
                 message='\"%s | %s\" Channel Offline. Try again later.' %(video_info['id'], video_info['title'])
                 )
+    Logger('* match = %s' %match)
 
     if description != '404: THIS CHANNEL NOT FOUND':
         Logger('* \"%s | %s\" Channel Online.' %(video_info['id'], video_info['title']))
@@ -405,7 +407,6 @@ def VideoOptionPage(video_info):
             url=video_info['url']
             ))
 
-    Logger('*' * 80)
     if match:
         Logger('* Remove \"%s | %s\" from bookmarks' %(video_info['id'], video_info['title']))
         oc.add(DirectoryObject(
@@ -446,7 +447,7 @@ def AddBookmark(video_info):
             '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
     elif genre in bm.keys():
         Logger('*' * 80)
-        if (next((b['id'] for b in bm[genre] if b['id'] == video_info['id']), False)):
+        if (True if [b['id'] for b in bm[genre] if b['id'] == video_info['id']] else False):
             Logger('* bookmark \"%s | %s\" already in your bookmarks' %(video_info['id'], video_info['title']), kind='Info')
             Logger('*' * 80)
 
@@ -480,7 +481,7 @@ def RemoveBookmark(video_info):
     genre = video_info['genres'][0] if video_info['genres'] else 'Unknown'
     bm = Dict['Bookmarks']
 
-    if ((next((b['id'] for b in bm[genre] if b['id'] == video_info['id']), False)) if genre in bm.keys() else False) if bm else False:
+    if ((True if [b['id'] for b in bm[genre] if b['id'] == video_info['id']] else False) if genre in bm.keys() else False) if bm else False:
         bm_g = bm[genre]
         Logger('*' * 80)
         for i in xrange(len(bm_g)):
