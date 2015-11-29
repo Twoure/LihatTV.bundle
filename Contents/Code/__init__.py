@@ -12,8 +12,20 @@ PREFIX = '/video/lihattv'
 # set background art and icon defaults
 ICON = 'icon-default.png'
 ART = 'art-default.jpg'
-VIDEO_THUMB = 'icon.genre.png'
-PREFS_ICON = 'icon.tools.png'
+VIDEO_ICON = 'icon-video.png'
+VIDEO_THUMB = 'thumb-video.png'
+DEFAULT_ICON = 'icon-art.png'
+COUNTRY_ICON = 'icon-countries.png'
+GENRE_ICON = 'icon-genres.png'
+ALL_ICON = 'icon-listview.png'
+NEXT_ICON = 'icon-next.png'
+BOOKMARK_ICON = 'icon-bookmark.png'
+BOOKMARK_ADD_ICON = 'icon-add-bookmark.png'
+BOOKMARK_REMOVE_ICON = 'icon-remove-bookmark.png'
+SEARCH_ICON = 'icon-search.png'
+PREFS_ICON = 'icon-prefs.png'
+
+LIST_VIEW_CLIENTS = ['Android', 'iOS']
 
 ####################################################################################################
 def Start():
@@ -22,8 +34,10 @@ def Start():
     ObjectContainer.title1 = TITLE
     ObjectContainer.art = R(ART)
 
-    DirectoryObject.thumb = R(VIDEO_THUMB)
+    DirectoryObject.thumb = R(DEFAULT_ICON)
     DirectoryObject.art = R(ART)
+
+    InputDirectoryObject.art = R(ART)
 
     VideoClipObject.art = R(ART)
 
@@ -35,13 +49,14 @@ def MainMenu():
     oc = ObjectContainer(title2=TITLE, no_cache=True)
 
     Updater(PREFIX + '/updater', oc)
-    oc.add(DirectoryObject(key=Callback(DirectoryList, page=1), title='All'))
-    oc.add(DirectoryObject(key=Callback(CountryList), title='Countries'))
-    oc.add(DirectoryObject(key=Callback(GenreList), title='Genres'))
-    oc.add(DirectoryObject(key=Callback(BookmarksMain), title='My Bookmarks'))
+    oc.add(DirectoryObject(key=Callback(DirectoryList, page=1), title='All', thumb=R(ALL_ICON)))
+    oc.add(DirectoryObject(key=Callback(CountryList), title='Countries', thumb=R(COUNTRY_ICON)))
+    oc.add(DirectoryObject(key=Callback(GenreList), title='Genres', thumb=R(GENRE_ICON)))
+    oc.add(DirectoryObject(key=Callback(BookmarksMain), title='My Bookmarks', thumb=R(BOOKMARK_ICON)))
     oc.add(PrefsObject(title='Preferences', thumb=R(PREFS_ICON)))
     oc.add(InputDirectoryObject(
-        key=Callback(Search), title='Search', summary='Search LihatTV', prompt='Search for...'))
+        key=Callback(Search),
+        title='Search', summary='Search LihatTV', prompt='Search for...', thumb=R(SEARCH_ICON)))
 
     return oc
 
@@ -346,14 +361,15 @@ def DirectoryList(page, genre='', country='', query=''):
             oc.add(DirectoryObject(
                 key=Callback(VideoOptionPage, video_info=video_info),
                 title='%s | ID: %s' %(ch_title, video_id), summary=tagline,
-                tagline=tagline, thumb=R(VIDEO_THUMB)
+                tagline=tagline, thumb=R(VIDEO_ICON)
                 ))
 
     if page < total_pgs and len(oc) > 0:
         oc.add(NextPageObject(
             key=Callback(DirectoryList,
                 page=int(page) + 1, genre=genre, country=country, query=query),
-            title='Next Page>>'))
+            title='Next Page>>', thumb=R(NEXT_ICON)
+            ))
 
     Logger('*' * 80)
 
@@ -377,7 +393,7 @@ def VideoOptionPage(video_info):
     description = None
     Logger('*' * 80)
 
-    if ((True if [g['id'] for g in bm[genre] if g['id'] == video_info['id']] else False) if genre in bm.keys() else False) if bm else False:
+    if ((True if [b['id'] for b in bm[genre] if b['id'] == video_info['id']] else False) if genre in bm.keys() else False) if bm else False:
         match = True
 
         v_url = video_info['url']
@@ -417,14 +433,16 @@ def VideoOptionPage(video_info):
         oc.add(DirectoryObject(
             key=Callback(RemoveBookmark, video_info=video_info),
             title='Remove Bookmark',
-            summary='Remove \"%s | %s\" from your Bookmarks list.' %(video_info['id'], video_info['title'])
+            summary='Remove \"%s | %s\" from your Bookmarks list.' %(video_info['id'], video_info['title']),
+            thumb=R(BOOKMARK_REMOVE_ICON)
             ))
     else:
         Logger('* Add \"%s | %s\" to bookmarks' %(video_info['id'], video_info['title']))
         oc.add(DirectoryObject(
             key=Callback(AddBookmark, video_info=video_info),
             title='Add Bookmark',
-            summary='Add \"%s | %s\" to your Bookmarks list.' %(video_info['id'], video_info['title'])
+            summary='Add \"%s | %s\" to your Bookmarks list.' %(video_info['id'], video_info['title']),
+            thumb=R(BOOKMARK_ADD_ICON)
             ))
     Logger('*' * 80)
 

@@ -10,6 +10,7 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 - Watch Live IPTV
 - Search IPTV
 - Custom Bookmarks
+- Update from within the Channel
 
 ## Channel Support
 
@@ -36,11 +37,6 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 
 - Channel = Movies, mp4 streams are old style Google Picasa links with set timeout.  Most links have expired.
 - Removed options for `mms` and `rtmp` streams.  Too many issues with compatibility in Plex Framework. May add back later.
+- Countries: List includes Countries with no m3u8 streams.
 
-## ChangeLog
-
-**1.0.1** - 11/28/15 - Fixed `next()` issue. Added bitly support, and Updater.
-
-**1.0.0** - 11/27/15 - First Release of LihatTV.bundle
-
-**0.0.0** - 11/01/15 - Uploaded Fork of LihatTV.bundle from LihatTV site.  Added API documentation, refer to "ref" branch for original.
+## [Changelog](Changelog.md)

@@ -39,9 +39,11 @@ def MetadataObjectForURL(url):
     try:
         art = player_node.get('style').split('background-image:url')[-1].lstrip('\(\'').rstrip('\'\)\;\"')
         if not art:
-            art = 'http://i.imgur.com/DKbNVLO.jpg'
+            time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
+            art = '/:/plugins/com.plexapp.plugins.lihattv/resources/art-default.jpg?t=' + str(time_stamp)
     except:
-        art = 'http://i.imgur.com/DKbNVLO.jpg'
+        time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
+        art = '/:/plugins/com.plexapp.plugins.lihattv/resources/art-default.jpg?t=' + str(time_stamp)
 
     thumb_node = player_node.xpath('.//script')[0].text_content().split(';')
     thumb = 'http://i.imgur.com/3EhTuzX.png'
@@ -49,7 +51,8 @@ def MetadataObjectForURL(url):
         if 'ChannelPoster' in item:
             thumb = item.split('ChannelPoster=')[-1].strip('\'')
             if not thumb:
-                thumb = 'http://i.imgur.com/3EhTuzX.png'
+                time_stamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
+                thumb = '/:/plugins/com.plexapp.plugins.lihattv/resources/thumb-video.png?t=' + str(time_stamp)
             elif not thumb.startswith('http'):
                 thumb = 'http://' + thumb
             break
