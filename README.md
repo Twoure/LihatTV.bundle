@@ -39,6 +39,8 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 
 ## ChangeLog
 
+**1.0.1** - 11/28/15 - Fixed `next()` issue. Added bitly support, and Updater.
+
 **1.0.0** - 11/27/15 - First Release of LihatTV.bundle
 
 **0.0.0** - 11/01/15 - Uploaded Fork of LihatTV.bundle from LihatTV site.  Added API documentation, refer to "ref" branch for original.
