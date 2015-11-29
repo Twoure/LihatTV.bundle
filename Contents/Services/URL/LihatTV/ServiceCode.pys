@@ -2,7 +2,7 @@
 
 """lihattv Service Code"""
 
-import base64, os
+import base64, os, urllib2
 
 ####################################################################################################
 def NormalizeURL(url):
@@ -30,15 +30,10 @@ def MetadataObjectForURL(url):
     # pull down raw content to get title from Regex
     html_page = HTTP.Request(url).content
     title = Regex('\<title\>(.*?)\<\/title\>').search(html_page).group(1).split('|')[-1].strip()
-    Log.Debug('*' * 80)
     Log.Debug('* title from Regex = %s' %title)
 
     # format raw content into html element for parsing
     html = HTML.ElementFromString(html_page)
-
-    # old title, had encoding error
-    #old_title = html.xpath('//head/title/text()')[0].split('|')[-1].strip()
-    #Log.Debug('* title from HTML.ElementFromString = %s' %old_title)
 
     player_node = html.xpath('//div[@id="player"]')[0]
     try:
@@ -91,7 +86,6 @@ def MetadataObjectForURL(url):
         if view_node:
             views = view_node[0].text.split(' Views')[0]
 
-    Log.Debug('*' * 80)
     Log.Debug('* title = %s' %title)
     Log.Debug('* id = %s' %url.split('=')[1])
     Log.Debug('* summary = %s' %summary)
@@ -130,7 +124,6 @@ def MediaObjectsForURL(url):
     location requires additional computation.
     """
 
-    Log.Debug('*' * 80)
     Log.Debug('* MediaObjectsForURL = %s' %url)
     Log.Debug('*' * 80)
 
@@ -161,6 +154,11 @@ def PlayVideo(url, **kwargs):
 
     v_url = base64.b64decode(url64).strip()
     Log.Debug('* v_url = %s' %v_url)
+    v_url_bitly = v_url.split('/', 3)[2]
+    if v_url_bitly == 'bit.ly' or v_url_bitly == 'j.mp' or v_url_bitly == 'bitly.com':
+        Log.Debug('* bitly link found')
+        v_url = urllib2.urlopen(v_url).url
+        Log.Debug('* bitly link expanded = %s' %v_url)
 
     v_url_base, v_url_extension = os.path.splitext(v_url)
     Log.Debug('* (v_url_base, v_url_extension) = (%s, %s)' %(v_url_base, v_url_extension))
@@ -170,8 +168,6 @@ def PlayVideo(url, **kwargs):
         Log.Debug('* cleaned v_url_extension = %s' %v_url_extension)
     elif '.m3u8?' in v_url_base:
         v_url_base = v_url_base.partition('?')[0]
-
-    Log.Debug('*' * 80)
 
     if v_url_extension == '.m3u8' or v_url_base.endswith('.m3u8'):
         m3u8_url = (v_url_base + v_url_extension).strip()
