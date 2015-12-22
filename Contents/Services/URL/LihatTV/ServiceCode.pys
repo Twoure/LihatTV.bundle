@@ -129,7 +129,7 @@ def MetadataObjectForURL(url):
         summary=summary,
         genres=genre,
         countries=country,
-        content_rating='X' if 'Adult' in genre else 'UR',
+        content_rating='X' if 'Adult' in genre else 'NR',
         year=year,
         originally_available_at=date,
         art=art,
