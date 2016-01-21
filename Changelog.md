@@ -1,5 +1,11 @@
 # ChangeLog
 
+##### 1.0.3
+- _01/21/16_
+- Added [DumbTools](https://github.com/coryo/DumbTools-for-Plex)
+- Input and Prefs directory support for "dumb" clients
+- Fixed content rating
+
 ##### 1.0.2
 - _11/29/15_
 - Fixes:

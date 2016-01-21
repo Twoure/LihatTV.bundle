@@ -4,6 +4,8 @@
 #                                                                                                  #
 ####################################################################################################
 from updater import Updater
+from DumbTools import DumbKeyboard
+from DumbTools import DumbPrefs
 
 # set global variables
 TITLE = L('title')
@@ -51,10 +53,18 @@ def MainMenu():
     oc.add(DirectoryObject(key=Callback(CountryList), title='Countries', thumb=R(COUNTRY_ICON)))
     oc.add(DirectoryObject(key=Callback(GenreList), title='Genres', thumb=R(GENRE_ICON)))
     oc.add(DirectoryObject(key=Callback(BookmarksMain), title='My Bookmarks', thumb=R(BOOKMARK_ICON)))
-    oc.add(PrefsObject(title='Preferences', thumb=R(PREFS_ICON)))
-    oc.add(InputDirectoryObject(
-        key=Callback(Search),
-        title='Search', summary='Search LihatTV', prompt='Search for...', thumb=R(SEARCH_ICON)))
+    if Client.Product in DumbPrefs.clients:
+        DumbPrefs(PREFIX, oc, title='Preferences', thumb=R(PREFS_ICON))
+    else:
+        oc.add(PrefsObject(title='Preferences', thumb=R(PREFS_ICON)))
+    if Client.Product in DumbKeyboard.clients:
+        DumbKeyboard(PREFIX, oc, Search, dktitle='Search', dkthumb=R(SEARCH_ICON))
+    else:
+        oc.add(InputDirectoryObject(
+            key=Callback(Search),
+            title='Search', summary='Search LihatTV', prompt='Search for...',
+            thumb=R(SEARCH_ICON)
+            ))
 
     return oc
 
