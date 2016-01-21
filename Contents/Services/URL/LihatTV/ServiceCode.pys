@@ -166,6 +166,8 @@ def PlayVideo(url, **kwargs):
     html = HTML.ElementFromURL(url, encoding='utf8')
 
     Log.Debug('*' * 80)
+    Log.Debug('* Client.Product     = %s' %Client.Product)
+    Log.Debug('* Client.Platform    = %s' %Client.Platform)
 
     node = html.xpath('./script')[0].text_content().strip()
     Log.Debug('* node = %s' %node)
