@@ -17,17 +17,17 @@ http://{domain}/api/?q={query}  >>  http://lihattv.com/api/?q=islogin
 ```
 pick one domain you like:
 
-* lihattv.us
-* lihattv.tv
+* **lihattv.us**
+* **lihattv.tv**
 * ~~lihattv.tk~~
 * ~~lihattv.cf~~
 * ~~lihattv.ga~~
 * ~~lihattv.gq~~
 * ~~lihattv.ml~~
-* lihattv.com
+* **lihattv.com**
 * ~~lihattv.co.in~~
-* lihattv.co.id
-* lihattv.co.uk
+* **lihattv.co.id**
+* **lihattv.co.uk**
 * ~~7dplxsxxh54rxp4n.onion~~
 
 ---
@@ -133,9 +133,15 @@ logout # Access log out function.
 <td>Generate database list via standard Kodi/XBMC playlist addons.</td>
 </tr>
 </tbody>
+</table>
+
+#### Query Offline Channels
+
+<table>
 <thead>
 <tr>
-<th>Query Offline Channels</th>
+<th>Query</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
@@ -143,13 +149,35 @@ logout # Access log out function.
 <td>offline&{parameter}</td>
 <td>Generate database list for offline channels with specified parameter, show in HTML with play link.</td>
 </tr>
+</tbody>
+</table>
+
+#### Query Country & Genre
+
+<table>
+<thead>
+<tr>
+<th>Query</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>country&{parameter}</td>
+<td>Generate countries list with specified parameter.</td>
+</tr>
+<tr>
+<td>genre&{parameter}</td>
+<td>Generate genres list with specified parameter.</td>
+</tr>
+</tbody>
 </table>
 
 ___
 #### Details of parameter:
 
 ```
-limit={max result a page}
+limit={max result a page, default is 40}
 
 page={page number}
 
@@ -168,9 +196,10 @@ year={1997,2015,etc...}
 stream={url/streamer addresses}
 ```
 
-parameter is optional, you can use or not. default limit is 40 list a page, for example:
+#### Query from Parameter:
+
 ```
-http://lihattv.com/api/?q=xml&search=!tb
+http://lihattv.com/api/?q=xml&search=abc
 
 http://lihattv.com/api/?q=asx&stream=mms://
 
@@ -179,4 +208,18 @@ http://lihattv.com/api/?q=kpl&format=webm
 http://lihattv.com/api/?q=m3u&genre=news&limit=200
 
 http://lihattv.com/api/?q=html&channel=movies&format=webm&limit=500
+```
+
+### Query from Offline:
+
+```
+http://lihattv.com/api/?q=offline&channel=tv
+```
+
+### Query from Country & Genre:
+
+```
+http://lihattv.com/api/?q=genre&channel=tv&stream=rtsp://
+
+http://lihattv.com/api/?q=country&channel=radio&stream=mp3
 ```
