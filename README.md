@@ -135,7 +135,7 @@ logout # Access log out function.
 </tbody>
 </table>
 
-#### Query Offline Channels
+### Query Offline Channels
 
 <table>
 <thead>
@@ -152,7 +152,7 @@ logout # Access log out function.
 </tbody>
 </table>
 
-#### Query Country & Genre
+### Query Country & Genre
 
 <table>
 <thead>
@@ -174,7 +174,7 @@ logout # Access log out function.
 </table>
 
 ___
-#### Details of parameter:
+### Details of parameter:
 
 ```
 limit={max result a page, default is 40}
@@ -196,7 +196,7 @@ year={1997,2015,etc...}
 stream={url/streamer addresses}
 ```
 
-#### Query from Parameter:
+### Query from Parameter:
 
 ```
 http://lihattv.com/api/?q=xml&search=abc
