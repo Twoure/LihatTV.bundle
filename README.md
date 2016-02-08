@@ -19,16 +19,16 @@ pick one domain you like:
 
 * lihattv.us
 * lihattv.tv
-* lihattv.tk
-* lihattv.cf
-* lihattv.ga
-* lihattv.gq
-* lihattv.ml
+* ~~lihattv.tk~~
+* ~~lihattv.cf~~
+* ~~lihattv.ga~~
+* ~~lihattv.gq~~
+* ~~lihattv.ml~~
 * lihattv.com
-* lihattv.co.in
+* ~~lihattv.co.in~~
 * lihattv.co.id
 * lihattv.co.uk
-* 7dplxsxxh54rxp4n.onion
+* ~~7dplxsxxh54rxp4n.onion~~
 
 ---
 
@@ -62,7 +62,7 @@ logout # Access log out function.
 ```
 ---
 
-### Result Query
+### Query Playlist
 
 <table>
 <thead>
@@ -133,6 +133,16 @@ logout # Access log out function.
 <td>Generate database list via standard Kodi/XBMC playlist addons.</td>
 </tr>
 </tbody>
+<thead>
+<tr>
+<th>Query Offline Channels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>offline&{parameter}</td>
+<td>Generate database list for offline channels with specified parameter, show in HTML with play link.</td>
+</tr>
 </table>
 
 ___
