@@ -184,7 +184,7 @@ def BookmarksSub(genre):
 def GenreList():
     """Get Genres for relevant category and stream"""
 
-    (test, message) = DomainTest()
+    test, message = DomainTest()
     if not test:
         return message
 
@@ -192,19 +192,13 @@ def GenreList():
     oc = ObjectContainer(title2=main_title)
 
     stream = '.m3u8'
-    limit = 10000
-    q = '/api/?q=html&channel=TV&stream=%s&limit=%i&page=1' %(stream, limit)
+    channel = 'tv'
+    q = '/api/?q=genre&channel=%s&stream=%s' %(channel, stream)
     url = 'http://' + Prefs['domain'] + q
 
-    html = HTML.ElementFromURL(url, encoding='utf8', errors='ignore')
+    html = HTML.ElementFromURL(url)
 
-    genres = []
-    for node in html.xpath('//ol/li'):
-        node_text = node.text_content().strip()
-        r = Regex('^(.+).+\((.+)[:](.+?)\ .(.+?)\)').search(node_text).group(3).strip()
-        if not r in genres:
-            genres.append(r)
-
+    genres = html.xpath('//option/text()')
     for genre in sorted(genres):
         if not Prefs['adult'] and 'adult' in genre.lower():
             continue
@@ -221,21 +215,24 @@ def GenreList():
 def CountryList():
     """Setup Country List, some countries will not have streams"""
 
-    (test, message) = DomainTest()
+    test, message = DomainTest()
     if not test:
         return message
 
     main_title = 'Countries'
     oc = ObjectContainer(title2=main_title)
 
-    url = 'http://' + Prefs['domain'] + '/admin/list.php?c=country'
+    stream = '.m3u8'
+    channel = 'tv'
+    q = '/api/?q=country&channel=%s&stream=%s' %(channel, stream)
+    url = 'http://' + Prefs['domain'] + q
 
     html = HTML.ElementFromURL(url)
-    for country in html.xpath('//option/text()'):
-        name = country.title()
+    countries = html.xpath('//option/text()')
+    for country in sorted(countries):
         oc.add(DirectoryObject(
-            key=Callback(DirectoryList, country=name, page=1),
-            title=name, summary='%s Country List ' %name
+            key=Callback(DirectoryList, country=country, page=1),
+            title=country, summary='%s Country List ' %country
             ))
 
     return oc
@@ -391,19 +388,17 @@ def DirectoryList(page, genre='', country='', query=''):
 def VideoOptionPage(video_info):
     """VideoObject and Bookmark function"""
 
-    (test, message) = DomainTest()
+    test, message = DomainTest()
     if not test:
         return message
 
     genre = video_info['genres'][0] if video_info['genres'] else 'Unknown'
     bm = Dict['Bookmarks']
-    match = False
+    match =  ((True if [b['id'] for b in bm[genre] if b['id'] == video_info['id']] else False) if genre in bm.keys() else False) if bm else False
     description = None
     Logger('*' * 80)
 
-    if ((True if [b['id'] for b in bm[genre] if b['id'] == video_info['id']] else False) if genre in bm.keys() else False) if bm else False:
-        match = True
-
+    if match:
         v_url = video_info['url']
         if 'player' in v_url:
             url_node = v_url.split('?')
