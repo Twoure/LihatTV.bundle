@@ -26,6 +26,7 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
   - Plex Media Player (Plex: 2.4.37, PMP: 1.0.3, OpenELEC(Raspberry Pi): 6.0)
   - Android (KitKat 4.4.2)
   - Plex/Web (2.5.4)
+- Not Working:
   - Chromecast
 
 ## How To Install
