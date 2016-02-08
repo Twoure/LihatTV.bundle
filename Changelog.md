@@ -1,5 +1,10 @@
 # ChangeLog
 
+##### 1.0.4
+- _02/08/16_
+- Utilizing updated API for Country & Genre lists
+- Fixed Countries list.  World still shows empty.
+
 ##### 1.0.3
 - _01/21/16_
 - Added [DumbTools](https://github.com/coryo/DumbTools-for-Plex)

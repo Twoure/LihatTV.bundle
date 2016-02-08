@@ -17,7 +17,7 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 
 ##### Plex Media Server:
 - Tested Working:
-  - Ubuntu 14.04 LTS: PMS version 0.9.15.1
+  - Ubuntu 14.04 LTS: PMS version 0.9.15.2
   - Windows 7 & 10: PMS version 0.9.12.13
 
 ##### Plex Clients:
@@ -25,7 +25,7 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
   - Plex Home Theater (Ubuntu 14.04 LTS, and Windows 7 & 10)
   - Plex Media Player (Plex: 2.4.37, PMP: 1.0.3, OpenELEC(Raspberry Pi): 6.0)
   - Android (KitKat 4.4.2)
-  - Plex/Web (2.5.3)
+  - Plex/Web (2.5.4)
   - Chromecast
 
 ## How To Install
@@ -39,6 +39,5 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 
 - Channel = Movies, mp4 streams are old style Google Picasa links with set timeout.  Most links have expired.
 - Removed options for `mms` and `rtmp` streams.  Too many issues with compatibility in Plex Framework. May add back later.
-- Countries: List includes Countries with no m3u8 streams.
 
 ## [Changelog](Changelog.md)
