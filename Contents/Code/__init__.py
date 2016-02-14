@@ -6,6 +6,8 @@
 from updater import Updater
 from DumbTools import DumbKeyboard
 from DumbTools import DumbPrefs
+import messages
+import AuthTools
 
 # set global variables
 TITLE = L('title')
@@ -27,6 +29,8 @@ BOOKMARK_REMOVE_ICON = 'icon-remove-bookmark.png'
 SEARCH_ICON = 'icon-search.png'
 PREFS_ICON = 'icon-prefs.png'
 
+MC = messages.NewMessageContainer(PREFIX, TITLE)
+
 ####################################################################################################
 def Start():
     HTTP.CacheTime = 0
@@ -41,22 +45,34 @@ def Start():
 
     VideoClipObject.art = R(ART)
 
+    Log.Debug('*' * 80)
+    Log.Debug('* Platform.OS        = %s' %Platform.OS)
+    Log.Debug('*' * 80)
+
     ValidatePrefs(start=True)
 
 ####################################################################################################
-@handler(PREFIX, TITLE, ICON, ART)
+@handler(PREFIX, TITLE, thumb=ICON, art=ART)
 def MainMenu():
+    Log.Debug('*' * 80)
+    Log.Debug('* Client.Product     = %s' %Client.Product)
+    Log.Debug('* Client.Platform    = %s' %Client.Platform)
+    Log.Debug('*' * 80)
+
     oc = ObjectContainer(title2=TITLE, no_cache=True)
 
     Updater(PREFIX + '/updater', oc)
+
     oc.add(DirectoryObject(key=Callback(DirectoryList, page=1), title='All', thumb=R(ALL_ICON)))
     oc.add(DirectoryObject(key=Callback(CountryList), title='Countries', thumb=R(COUNTRY_ICON)))
     oc.add(DirectoryObject(key=Callback(GenreList), title='Genres', thumb=R(GENRE_ICON)))
     oc.add(DirectoryObject(key=Callback(BookmarksMain), title='My Bookmarks', thumb=R(BOOKMARK_ICON)))
+
     if Client.Product in DumbPrefs.clients:
         DumbPrefs(PREFIX, oc, title='Preferences', thumb=R(PREFS_ICON))
-    else:
+    elif AuthTools.Auth():
         oc.add(PrefsObject(title='Preferences', thumb=R(PREFS_ICON)))
+
     if Client.Product in DumbKeyboard.clients:
         DumbKeyboard(PREFIX, oc, Search, dktitle='Search', dkthumb=R(SEARCH_ICON))
     else:
@@ -105,7 +121,7 @@ def DomainTest():
     """Setup MessageContainer if Dict[\'domain_test\'] failed"""
 
     if Dict['domain_test'] == 'Fail':
-        return (False, MessageContainer(
+        return (False, MC.message_container(
             'Error',
             'Domain %s offline. Please pick a different Domain.' %Prefs['domain']))
     else:
@@ -117,7 +133,7 @@ def BookmarksMain():
     """Setup Bookmark Main Menu. Create Genre Sub-directories"""
 
     if not Dict['Bookmarks']:
-        return MessageContainer('Bookmarks', 'No Bookmarks yet. Get out there and start adding some!!!')
+        return MC.message_container('Bookmarks', 'No Bookmarks yet. Get out there and start adding some!!!')
 
     oc = ObjectContainer(title2='My Bookmarks')
 
@@ -136,7 +152,7 @@ def BookmarksMain():
     if len(oc) > 0:
         return oc
     else:
-        return MessageContainer('Warning', 'No Bookmarks yet. Get out there and start adding some!!!')
+        return MC.message_container('Warning', 'No Bookmarks yet. Get out there and start adding some!!!')
 
 ####################################################################################################
 @route(PREFIX + '/bookmarkssub')
@@ -144,7 +160,7 @@ def BookmarksSub(genre):
     """Display Bookmarks"""
 
     if not genre in Dict['Bookmarks'].keys():
-        return MessageContainer(
+        return MC.message_container(
             'Error',
             '%s Bookmarks list is dirty, or no %s Bookmark list exist.' %(genre, genre))
 
@@ -177,7 +193,7 @@ def BookmarksSub(genre):
     if len(oc) > 0:
         return oc
     else:
-        return MessageContainer('Bookmarks', 'No Bookmarks yet. Get out there and start adding some!!!')
+        return MC.message_container('Bookmarks', 'No Bookmarks yet. Get out there and start adding some!!!')
 
 ####################################################################################################
 @route(PREFIX + '/genrelist')
@@ -255,7 +271,7 @@ def Search(query=''):
     if not int(page_el.get('total')) == 0:
         return DirectoryList(page=1, query=query)
     else:
-        return MessageContainer('Search Warning',
+        return MC.message_container('Search Warning',
             'There are no search results for \"%s\". Try being less specific.' %query)
 
 ####################################################################################################
@@ -296,9 +312,9 @@ def DirectoryList(page, genre='', country='', query=''):
     page_el = XML.ElementFromString(r_info)
     total = int(page_el.get('total'))
     if total == 0 and not genre == '':
-        return MessageContainer('Warning', 'No %s Streams for %s TV List' %(stream, genre))
+        return MC.message_container('Warning', 'No %s Streams for %s TV List' %(stream, genre))
     elif total == 0 and not country == '':
-        return MessageContainer('Warning', 'No %s Streams for %s TV List' %(stream, country))
+        return MC.message_container('Warning', 'No %s Streams for %s TV List' %(stream, country))
 
     total_pgs = int(total/limit) + 1
     Logger('* total pages = %i' %total_pgs)
@@ -381,7 +397,7 @@ def DirectoryList(page, genre='', country='', query=''):
     if len(oc) > 0:
         return oc
     else:
-        return MessageContainer('Warning', 'No Streams Found')
+        return MC.message_container('Warning', 'No Streams Found')
 
 ####################################################################################################
 @route(PREFIX + '/videooptionpage', video_info=dict)
@@ -469,7 +485,7 @@ def AddBookmark(video_info):
         Dict['Bookmarks'] = {genre: [new_bookmark]}
         Dict.Save()
 
-        return MessageContainer('Bookmarks',
+        return MC.message_container('Bookmarks',
             '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
     elif genre in bm.keys():
         Logger('*' * 80)
@@ -477,7 +493,7 @@ def AddBookmark(video_info):
             Logger('* bookmark \"%s | %s\" already in your bookmarks' %(video_info['id'], video_info['title']), kind='Info')
             Logger('*' * 80)
 
-            return MessageContainer('Warning',
+            return MC.message_container('Warning',
                 '\"%s | %s\" is already in your bookmarks.' %(video_info['id'], video_info['title']))
         else:
             temp = {}
@@ -487,13 +503,13 @@ def AddBookmark(video_info):
             Logger('*' * 80)
             Dict.Save()
 
-            return MessageContainer('Bookmarks',
+            return MC.message_container('Bookmarks',
                 '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
     else:
         Dict['Bookmarks'].update({genre: [new_bookmark]})
         Dict.Save()
 
-        return MessageContainer('Bookmarks',
+        return MC.message_container('Bookmarks',
             '\"%s | %s\" has been added to your bookmarks.' %(video_info['id'], video_info['title']))
 
 ####################################################################################################
@@ -527,17 +543,17 @@ def RemoveBookmark(video_info):
             del bm_g
             Dict.Save()
 
-            return MessageContainer('Remove Bookmark',
+            return MC.message_container('Remove Bookmark',
                 '\"%s | %s\" bookmark was the last, so removed %s bookmark section'
                 %(video_info['id'], video_info['title'], genre)
                 )
         else:
-            return MessageContainer('Remove Bookmark',
+            return MC.message_container('Remove Bookmark',
                 '\"%s | %s\" has been removed from your bookmarks.'
                 %(video_info['id'], video_info['title'])
                 )
     else:
-        return MessageContainer(
+        return MC.message_container(
             'Bookmark Error',
             'ERROR: \"%s | %s\" cannot be removed. The Bookmark Dictionary %s does not exist!'
             %(video_info['id'], video_info['title'], genre)
